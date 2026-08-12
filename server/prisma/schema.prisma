@@ -1,0 +1,138 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id       String @id @default(uuid())
+  name     String
+  email    String @unique
+  password String
+
+  surveys   Survey[]
+  responses Response[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Survey {
+  id          String       @id @default(uuid())
+  title       String
+  description String?
+  slug        String       @unique
+  allowMultipleResponses  Boolean @default(false)
+  viewCount   Int          @default(0)
+  status      SurveyStatus @default(DRAFT)
+  isAnonymous Boolean      @default(false)
+  publishedAt DateTime?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  questions Question[]
+  responses Response[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Question {
+  id           String       @id @default(uuid())
+  questionText String
+  questionType QuestionType
+  isRequired   Boolean      @default(false)
+  position     Int
+  minValue     Int?
+  maxValue     Int?
+
+  surveyId String
+  survey   Survey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+
+  options QuestionOption[]
+  answers Answer[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([surveyId])
+}
+
+model QuestionOption {
+  id         String @id @default(uuid())
+  optionText String
+  position   Int
+
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  answers Answer[]
+
+  createdAt DateTime @default(now())
+
+  @@index([questionId])
+}
+
+model Response {
+  id          String    @id @default(uuid())
+
+  surveyId String
+  survey   Survey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  answers Answer[]
+
+  createdAt DateTime @default(now())
+
+  @@index([surveyId])
+  @@index([userId])
+}
+
+model Answer {
+  id String @id @default(uuid())
+
+  responseId String
+  response   Response @relation(fields: [responseId], references: [id], onDelete: Cascade)
+
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  optionId String?
+  option   QuestionOption? @relation(fields: [optionId], references: [id], onDelete: SetNull)
+
+  answerText   String?
+  answerNumber Float?
+  answerDate   DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([responseId])
+  @@index([questionId])
+  @@index([optionId])
+}
+
+enum SurveyStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+}
+
+enum QuestionType {
+  SHORT_TEXT
+  LONG_TEXT
+  SINGLE_CHOICE
+  MULTIPLE_CHOICE
+  DROPDOWN
+  RATING
+  YES_NO
+  NUMBER
+  DATE
+}
