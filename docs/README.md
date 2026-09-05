@@ -4,12 +4,12 @@ A chronological log of the work done on this project. Each update is a standalon
 
 ## Index
 
-| # | File | Summary |
-|---|------|---------|
-| 1 | [01-initial-prisma-schema.md](01-initial-prisma-schema.md) | Initial database schema for users, surveys, questions, options, responses and answers |
-| 2 | [02-driver-adapter-setup.md](02-driver-adapter-setup.md) | Prisma 7 driver-adapter client setup and project config |
-| 3 | [03-schema-enhancements.md](03-schema-enhancements.md) | Schema review fixes: slug, duplicate responses, rating bounds, analytics fields |
-| 4 | [04-build-error-fixes.md](04-build-error-fixes.md) | TypeScript/ESM errors resolved during initial setup |
+| #   | File                                                       | Summary                                                                               |
+| --- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| 1   | [01-initial-prisma-schema.md](01-initial-prisma-schema.md) | Initial database schema for users, surveys, questions, options, responses and answers |
+| 2   | [02-driver-adapter-setup.md](02-driver-adapter-setup.md)   | Prisma 7 driver-adapter client setup and project config                               |
+| 3   | [03-schema-enhancements.md](03-schema-enhancements.md)     | Schema review fixes: slug, duplicate responses, rating bounds, analytics fields       |
+| 4   | [04-build-error-fixes.md](04-build-error-fixes.md)         | TypeScript/ESM errors resolved during initial setup                                   |
 
 ## How to add an update
 

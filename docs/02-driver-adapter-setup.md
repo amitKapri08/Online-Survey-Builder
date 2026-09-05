@@ -6,13 +6,13 @@ Configured Prisma 7's driver-adapter model: the database connection is supplied 
 
 ## Files touched
 
-| File | Change |
-|------|--------|
-| `server/prisma/schema.prisma` | Generator `prisma-client` → output `../src/generated/prisma` |
-| `server/prisma.config.ts` | CLI config: schema path, migrations path, datasource `url` from `DATABASE_URL` |
-| `server/src/config/prisma.ts` | Single shared `PrismaClient` instance built with the driver adapter |
-| `server/package.json` | Added `@prisma/adapter-pg`, `bcrypt`, `cookie-parser`, `cors`, `dotenv`, `express`, `helmet`, `jsonwebtoken`, `morgan`, `zod`, `prisma`, `typescript` etc. |
-| `server/.env` | `DATABASE_URL`, `JWT_SECRET`, `PORT` |
+| File                          | Change                                                                                                                                                     |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `server/prisma/schema.prisma` | Generator `prisma-client` → output `../src/generated/prisma`                                                                                               |
+| `server/prisma.config.ts`     | CLI config: schema path, migrations path, datasource `url` from `DATABASE_URL`                                                                             |
+| `server/src/config/prisma.ts` | Single shared `PrismaClient` instance built with the driver adapter                                                                                        |
+| `server/package.json`         | Added `@prisma/adapter-pg`, `bcrypt`, `cookie-parser`, `cors`, `dotenv`, `express`, `helmet`, `jsonwebtoken`, `morgan`, `zod`, `prisma`, `typescript` etc. |
+| `server/.env`                 | `DATABASE_URL`, `JWT_SECRET`, `PORT`                                                                                                                       |
 
 ## The adapter client (`src/config/prisma.ts`)
 

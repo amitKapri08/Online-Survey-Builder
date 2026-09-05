@@ -67,7 +67,7 @@ export async function login(payload: LoginPayload): Promise<AuthResponse> {
 }
 
 export async function getMe(): Promise<User> {
-  const response = await apiClient.get<MeResponse>("/auth/me");
+  const response = await apiClient.get<MeResponse>("/users/me");
 
   return response.data.data.user;
 }

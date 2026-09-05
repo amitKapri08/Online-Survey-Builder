@@ -1,32 +1,28 @@
 import type { Response } from "express";
+import ms from "ms";
 
 import { env } from "../config/env.js";
 
 const AUTH_COOKIE_NAME = "token";
 const CSRF_COOKIE_NAME = "csrf-token";
 const REFRESH_COOKIE_NAME = "refresh-token";
+const VISITOR_COOKIE_NAME = "visitor-id";
 
 function parseDuration(duration: string | number): number {
-  const num = typeof duration === "number" ? duration : parseInt(String(duration), 10);
-  const match = String(num).match(/^(\d+)(d|h|m|s)$/);
-  if (!match || !match[1]) {
-    return 24 * 60 * 60 * 1000;
+  if (typeof duration === "number") {
+    return duration * 1000;
   }
-  const value = parseInt(match[1], 10);
-  const unit = match![2];
-  switch (unit) {
-    case "d":
-      return value * 24 * 60 * 60 * 1000;
-    case "h":
-      return value * 60 * 60 * 1000;
-    case "m":
-      return value * 60 * 1000;
-    case "s":
-      return value * 1000;
-    default:
-      return 24 * 60 * 60 * 1000;
+
+  const parsed = ms(duration as ms.StringValue);
+  if (!parsed) {
+    throw new Error(`Invalid duration value: ${duration}`);
   }
+  return parsed;
 }
+
+export const getRefreshTokenExpiryDate = (): Date => {
+  return new Date(Date.now() + parseDuration(env.REFRESH_TOKEN_EXPIRES_IN));
+};
 
 export const setAuthCookie = (res: Response, token: string): void => {
   res.cookie(AUTH_COOKIE_NAME, token, {
@@ -64,7 +60,7 @@ export const clearRefreshTokenCookie = (res: Response): void => {
 
 export const setCsrfCookie = (res: Response, token: string): void => {
   res.cookie(CSRF_COOKIE_NAME, token, {
-    httpOnly: false,
+    httpOnly: true,
     secure: env.NODE_ENV === "production",
     sameSite: "lax",
   });
@@ -72,10 +68,19 @@ export const setCsrfCookie = (res: Response, token: string): void => {
 
 export const clearCsrfCookie = (res: Response): void => {
   res.clearCookie(CSRF_COOKIE_NAME, {
-    httpOnly: false,
+    httpOnly: true,
     secure: env.NODE_ENV === "production",
     sameSite: "lax",
   });
 };
 
-export { AUTH_COOKIE_NAME, CSRF_COOKIE_NAME };
+export const setVisitorCookie = (res: Response, visitorId: string): void => {
+  res.cookie(VISITOR_COOKIE_NAME, visitorId, {
+    httpOnly: true,
+    secure: env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 365 * 24 * 60 * 60 * 1000,
+  });
+};
+
+export { AUTH_COOKIE_NAME, CSRF_COOKIE_NAME, VISITOR_COOKIE_NAME };

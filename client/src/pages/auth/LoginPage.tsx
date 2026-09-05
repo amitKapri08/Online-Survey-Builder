@@ -6,8 +6,7 @@ export default function LoginPage() {
       <div className="space-y-6">
         <div className="space-y-2">
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Welcome back!{" "}
-            <span className="sr-only">Waving hand</span>
+            Welcome back! <span className="sr-only">Waving hand</span>
             <span aria-hidden="true">👋</span>
           </h1>
 

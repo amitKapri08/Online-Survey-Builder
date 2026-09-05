@@ -12,9 +12,10 @@ export function AuthInitializer({ children }: AuthInitializerProps) {
   const { setUser, initializeAuth } = useAuth();
 
   const csrfQuery = useCsrf();
-  const meQuery = useMe();
+  const meQuery = useMe({ enabled: csrfQuery.isSuccess });
 
-  const isInitializing = csrfQuery.isPending || meQuery.isPending;
+  const isInitializing =
+    csrfQuery.isPending || (csrfQuery.isSuccess && meQuery.isPending);
 
   useEffect(() => {
     if (meQuery.isSuccess) {

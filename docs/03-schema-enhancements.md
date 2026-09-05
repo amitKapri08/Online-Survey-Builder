@@ -6,13 +6,13 @@ Applied a design review of the initial schema to close gaps against the project 
 
 ## Changes
 
-| Model | Field | Why |
-|-------|-------|-----|
-| `Survey` | `slug String @unique` | Gives friendly shareable links like `/s/:slug` instead of raw UUIDs. |
-| `Survey` | `allowMultipleResponses Boolean @default(false)` | Controls whether the same person may submit more than once. |
-| `Survey` | `viewCount Int @default(0)` | Cheap "views" counter for analytics/landing stats. |
-| `Question` | `minValue Int?`, `maxValue Int?` | Lets the frontend render the scale for `RATING` / `NUMBER`. |
-| `Response` | removed `submittedAt DateTime?` | Redundant — `createdAt` already records the submission time. |
+| Model      | Field                                            | Why                                                                  |
+| ---------- | ------------------------------------------------ | -------------------------------------------------------------------- |
+| `Survey`   | `slug String @unique`                            | Gives friendly shareable links like `/s/:slug` instead of raw UUIDs. |
+| `Survey`   | `allowMultipleResponses Boolean @default(false)` | Controls whether the same person may submit more than once.          |
+| `Survey`   | `viewCount Int @default(0)`                      | Cheap "views" counter for analytics/landing stats.                   |
+| `Question` | `minValue Int?`, `maxValue Int?`                 | Lets the frontend render the scale for `RATING` / `NUMBER`.          |
+| `Response` | removed `submittedAt DateTime?`                  | Redundant — `createdAt` already records the submission time.         |
 
 ## Explicitly rejected
 

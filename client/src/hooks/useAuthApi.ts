@@ -16,12 +16,13 @@ export const authKeys = {
   csrf: () => [...authKeys.all, "csrf"] as const,
 };
 
-export function useMe() {
+export function useMe(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: authKeys.me(),
     queryFn: getMe,
     retry: false,
     refetchOnWindowFocus: false,
+    ...options,
   });
 }
 
