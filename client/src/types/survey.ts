@@ -29,6 +29,27 @@ export interface SurveyDetail extends SurveyListItem {
   questions?: SurveyQuestion[];
 }
 
+export interface PublicSurvey {
+  id: string;
+  title: string;
+  description: string | null;
+  slug: string;
+  status: SurveyStatus;
+  isAnonymous: boolean;
+  questions: SurveyQuestion[];
+}
+
+export type SurveyAnswerValue = string | number | string[];
+
+export interface SurveyAnswerInput {
+  questionId: string;
+  value: SurveyAnswerValue;
+}
+
+export interface SubmitResponsePayload {
+  answers: SurveyAnswerInput[];
+}
+
 export interface SurveyQuestion {
   id: string;
   questionText: string;
@@ -59,6 +80,10 @@ export type QuestionType =
 
 export interface SurveyListResponse {
   surveys: SurveyListItem[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 }
 
 export interface CreateSurveyPayload {
@@ -76,4 +101,38 @@ export interface UpdateSurveyPayload {
   status?: SurveyStatus;
   isAnonymous?: boolean;
   allowMultipleResponses?: boolean;
+}
+
+export interface QuestionOptionInput {
+  id?: string;
+  optionText: string;
+  position?: number;
+}
+
+export interface CreateQuestionPayload {
+  questionText: string;
+  questionType: QuestionType;
+  isRequired?: boolean;
+  minValue?: number;
+  maxValue?: number;
+  options?: QuestionOptionInput[];
+}
+
+export interface UpdateQuestionPayload {
+  questionText?: string;
+  questionType?: QuestionType;
+  isRequired?: boolean;
+  minValue?: number | null;
+  maxValue?: number | null;
+  options?: QuestionOptionInput[];
+}
+
+export interface CreateOptionPayload {
+  optionText: string;
+  position?: number;
+}
+
+export interface UpdateOptionPayload {
+  optionText?: string;
+  position?: number;
 }

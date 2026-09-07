@@ -138,10 +138,36 @@ export const getSurveys = async (userId: string, query: SurveyQueryInput) => {
   };
 };
 
+const questionDetailSelect = {
+  select: {
+    id: true,
+    questionText: true,
+    questionType: true,
+    isRequired: true,
+    position: true,
+    minValue: true,
+    maxValue: true,
+    options: {
+      select: {
+        id: true,
+        optionText: true,
+        position: true,
+      },
+      orderBy: { position: "asc" as const },
+    },
+  },
+} as const;
+
 export const getSurveyById = async (surveyId: string, userId?: string) => {
   const survey = await prisma.survey.findUnique({
     where: { id: surveyId },
-    select: surveyDetailSelect,
+    select: {
+      ...surveyDetailSelect,
+      questions: {
+        ...questionDetailSelect,
+        orderBy: { position: "asc" as const },
+      },
+    },
   });
 
   if (!survey) {
@@ -155,32 +181,23 @@ export const getSurveyById = async (surveyId: string, userId?: string) => {
   return survey;
 };
 
+const surveyPublicSelect = {
+  id: true,
+  title: true,
+  description: true,
+  slug: true,
+  status: true,
+  isAnonymous: true,
+  questions: {
+    ...questionDetailSelect,
+    orderBy: { position: "asc" as const },
+  },
+} as const;
+
 export const getSurveyBySlug = async (slug: string) => {
   const survey = await prisma.survey.findUnique({
     where: { slug },
-    select: {
-      ...surveyDetailSelect,
-      questions: {
-        select: {
-          id: true,
-          questionText: true,
-          questionType: true,
-          isRequired: true,
-          position: true,
-          minValue: true,
-          maxValue: true,
-          options: {
-            select: {
-              id: true,
-              optionText: true,
-              position: true,
-            },
-            orderBy: { position: "asc" as const },
-          },
-        },
-        orderBy: { position: "asc" as const },
-      },
-    },
+    select: surveyPublicSelect,
   });
 
   if (!survey) {

@@ -83,4 +83,9 @@ export const setVisitorCookie = (res: Response, visitorId: string): void => {
   });
 };
 
-export { AUTH_COOKIE_NAME, CSRF_COOKIE_NAME, VISITOR_COOKIE_NAME };
+export {
+  AUTH_COOKIE_NAME,
+  CSRF_COOKIE_NAME,
+  REFRESH_COOKIE_NAME,
+  VISITOR_COOKIE_NAME,
+};

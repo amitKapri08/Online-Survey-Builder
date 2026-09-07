@@ -8,4 +8,6 @@ export const ROUTES = {
   SURVEY_EDIT: "/surveys/:id/edit",
   SURVEY_PUBLIC: "/s/:slug",
   ADMIN: "/admin",
+  PRIVACY_POLICY: "/privacy",
+  TERMS_OF_USE: "/terms",
 } as const;
