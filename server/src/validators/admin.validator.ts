@@ -7,4 +7,9 @@ export const adminQuerySchema = z.object({
   search: z.string().trim().max(100).optional(),
 });
 
+export const updateUserRoleSchema = z.object({
+  role: z.enum(["USER", "ADMIN"]),
+});
+
 export type AdminQueryInput = z.infer<typeof adminQuerySchema>;
+export type UpdateUserRoleInput = z.infer<typeof updateUserRoleSchema>;

@@ -54,7 +54,7 @@ export const refresh = async (
       where: { id: session.userId },
     });
 
-    if (!user) {
+    if (!user || user.deletedAt) {
       throw new AppError("User not found", 401);
     }
 

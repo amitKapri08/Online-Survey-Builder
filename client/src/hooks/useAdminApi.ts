@@ -1,9 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
   getAdminUsers,
   getAdminSurveys,
   getAdminStats,
+  updateAdminUserRole,
+  deleteAdminUser,
 } from "@/services/admin.service";
 
 export const adminKeys = {
@@ -42,5 +44,30 @@ export function useAdminStats() {
   return useQuery({
     queryKey: adminKeys.stats(),
     queryFn: getAdminStats,
+  });
+}
+
+export function useUpdateAdminUserRole() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ userId, role }: { userId: string; role: "USER" | "ADMIN" }) =>
+      updateAdminUserRole(userId, role),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminKeys.users() });
+      queryClient.invalidateQueries({ queryKey: adminKeys.stats() });
+    },
+  });
+}
+
+export function useDeleteAdminUser() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (userId: string) => deleteAdminUser(userId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminKeys.users() });
+      queryClient.invalidateQueries({ queryKey: adminKeys.stats() });
+    },
   });
 }

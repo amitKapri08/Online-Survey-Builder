@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { AxiosError } from "axios";
 import { CheckCircle2, ClipboardList, PencilRuler } from "lucide-react";
 import { toast } from "sonner";
 
@@ -36,6 +37,15 @@ function SurveyPublicPage() {
       });
       setSubmitted(true);
     } catch (error) {
+      const alreadySubmitted =
+        error instanceof AxiosError &&
+        error.response?.status === 409 &&
+        error.response?.data?.code === "ALREADY_SUBMITTED";
+
+      if (alreadySubmitted) {
+        setSubmitted(true);
+        return;
+      }
       toast.error(getApiErrorMessage(error, "Failed to submit response"));
     }
   };
@@ -82,12 +92,15 @@ function SurveyPublicPage() {
             Thank you! Your response has been recorded.
           </h1>
           <p className="text-sm text-muted-foreground">
-            Please close this page, or submit another response if the survey
-            allows it.
+            {survey.allowMultipleResponses
+              ? "Please close this page, or submit another response."
+              : "Please close this page. Thank you for taking part."}
           </p>
-          <Button variant="outline" onClick={handleSubmitAnother}>
-            Submit another response
-          </Button>
+          {survey.allowMultipleResponses && (
+            <Button variant="outline" onClick={handleSubmitAnother}>
+              Submit another response
+            </Button>
+          )}
         </div>
       </div>
     );
@@ -123,6 +136,7 @@ function SurveyPublicPage() {
             ) : (
               <SurveyAnswerForm
                 questions={survey.questions}
+                isAnonymous={survey.isAnonymous}
                 isSubmitting={submitMutation.isPending}
                 onSubmit={handleSubmit}
               />

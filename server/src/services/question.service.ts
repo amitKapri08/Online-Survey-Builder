@@ -3,6 +3,7 @@ import { prisma } from "../config/prisma.js";
 import { AppError } from "../utils/AppError.js";
 import type {
   CreateQuestionInput,
+  BatchCreateQuestionsInput,
   UpdateQuestionInput,
 } from "../validators/question.validator.js";
 
@@ -82,7 +83,9 @@ async function syncQuestionOptions(
   const existingIds = new Set(existing.map((option) => option.id));
   const retainedIds = options
     .map((option) => option.id)
-    .filter((id): id is string => typeof id === "string" && existingIds.has(id));
+    .filter(
+      (id): id is string => typeof id === "string" && existingIds.has(id),
+    );
 
   await tx.questionOption.deleteMany({
     where: { questionId, id: { notIn: retainedIds } },
@@ -146,6 +149,55 @@ export const createQuestion = async (
   return question;
 };
 
+export const batchCreateQuestions = async (
+  surveyId: string,
+  userId: string,
+  input: BatchCreateQuestionsInput,
+) => {
+  await getEditableSurveyOrThrow(surveyId, userId);
+
+  return await prisma.$transaction(async (tx) => {
+    const lastQuestion = await tx.question.findFirst({
+      where: { surveyId },
+      orderBy: { position: "desc" },
+      select: { position: true },
+    });
+
+    let currentPosition = lastQuestion?.position ?? 0;
+    const createdQuestions = [];
+
+    for (const item of input.questions) {
+      currentPosition += 1;
+      const data: Prisma.QuestionUncheckedCreateInput = {
+        surveyId,
+        questionText: item.questionText,
+        questionType: item.questionType,
+        isRequired: item.isRequired ?? false,
+        minValue: item.minValue ?? null,
+        maxValue: item.maxValue ?? null,
+        position: currentPosition,
+      };
+
+      if (item.options?.length) {
+        data.options = {
+          create: item.options.map((option, index) => ({
+            optionText: option.optionText,
+            position: option.position ?? index + 1,
+          })),
+        };
+      }
+
+      const created = await tx.question.create({
+        data,
+        select: questionSelect,
+      });
+      createdQuestions.push(created);
+    }
+
+    return createdQuestions;
+  });
+};
+
 export const updateQuestion = async (
   surveyId: string,
   questionId: string,
@@ -176,7 +228,10 @@ export const updateQuestion = async (
   const isChoice = CHOICE_TYPES.includes(nextType);
   const nextOptions = input.options;
 
-  if (!isChoice && (nextType !== existing.questionType || nextOptions !== undefined)) {
+  if (
+    !isChoice &&
+    (nextType !== existing.questionType || nextOptions !== undefined)
+  ) {
     const question = await prisma.$transaction(async (tx) => {
       const updated = await tx.question.update({
         where: { id: questionId },

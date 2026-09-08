@@ -1,13 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
+  changePassword,
   getCsrfToken,
   getMe,
   login,
   logout,
   register,
+  updateProfile,
+  type ChangePasswordPayload,
   type LoginPayload,
   type RegisterPayload,
+  type UpdateProfilePayload,
 } from "@/services/auth.service";
 
 export const authKeys = {
@@ -64,5 +68,22 @@ export function useLogout() {
         queryKey: authKeys.csrf(),
       });
     },
+  });
+}
+
+export function useUpdateProfile() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: UpdateProfilePayload) => updateProfile(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: authKeys.me() });
+    },
+  });
+}
+
+export function useChangePassword() {
+  return useMutation({
+    mutationFn: (payload: ChangePasswordPayload) => changePassword(payload),
   });
 }

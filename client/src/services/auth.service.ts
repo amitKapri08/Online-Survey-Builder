@@ -13,6 +13,15 @@ export interface LoginPayload {
   password: string;
 }
 
+export interface UpdateProfilePayload {
+  name: string;
+}
+
+export interface ChangePasswordPayload {
+  currentPassword: string;
+  newPassword: string;
+}
+
 export interface User {
   id: string;
   name: string;
@@ -71,4 +80,18 @@ export async function logout(): Promise<void> {
   await apiClient.post("/auth/logout");
 
   setStoredCsrfToken(null);
+}
+
+export async function updateProfile(
+  payload: UpdateProfilePayload,
+): Promise<User> {
+  const response = await apiClient.patch<MeResponse>("/users/profile", payload);
+
+  return response.data.data.user;
+}
+
+export async function changePassword(
+  payload: ChangePasswordPayload,
+): Promise<void> {
+  await apiClient.post("/users/password", payload);
 }

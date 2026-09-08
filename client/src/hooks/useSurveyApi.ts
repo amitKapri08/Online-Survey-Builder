@@ -7,6 +7,7 @@ import {
   getSurveyBySlug,
   updateSurvey,
   deleteSurvey,
+  duplicateSurvey,
   createQuestion,
   updateQuestion,
   deleteQuestion,
@@ -15,6 +16,9 @@ import {
   updateOption,
   deleteOption,
   submitResponse,
+  getSurveyResponses,
+  getSurveyAnalytics,
+  exportResponsesCsv,
 } from "@/services/survey.service";
 import type {
   CreateSurveyPayload,
@@ -24,6 +28,8 @@ import type {
   CreateOptionPayload,
   UpdateOptionPayload,
   SubmitResponsePayload,
+  ResponsesPage,
+  QuestionAnalytics,
 } from "@/types/survey";
 
 export const surveyKeys = {
@@ -32,6 +38,9 @@ export const surveyKeys = {
     [...surveyKeys.all, "list", params] as const,
   detail: (id: string) => [...surveyKeys.all, "detail", id] as const,
   slug: (slug: string) => [...surveyKeys.all, "slug", slug] as const,
+  responses: (id: string, params?: Record<string, unknown>) =>
+    [...surveyKeys.all, "responses", id, params] as const,
+  analytics: (id: string) => [...surveyKeys.all, "analytics", id] as const,
 };
 
 export function useSurveys(params: {
@@ -92,6 +101,18 @@ export function useDeleteSurvey() {
     mutationFn: (id: string) => deleteSurvey(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: surveyKeys.all });
+    },
+  });
+}
+
+export function useDuplicateSurvey() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => duplicateSurvey(id),
+    onSuccess: (_data, id) => {
+      queryClient.invalidateQueries({ queryKey: surveyKeys.all });
+      queryClient.invalidateQueries({ queryKey: surveyKeys.detail(id) });
     },
   });
 }
@@ -232,5 +253,36 @@ export function useSubmitResponse() {
       surveyId: string;
       payload: SubmitResponsePayload;
     }) => submitResponse(surveyId, payload),
+  });
+}
+
+export function useSurveyResponses(
+  surveyId: string,
+  params: { page?: number; limit?: number; order?: "newest" | "oldest" } = {},
+  options: { enabled?: boolean } = {},
+) {
+  return useQuery<ResponsesPage>({
+    queryKey: surveyKeys.responses(surveyId, params),
+    queryFn: () => getSurveyResponses(surveyId, params),
+    enabled: !!surveyId && options.enabled !== false,
+    staleTime: 30_000,
+  });
+}
+
+export function useSurveyAnalytics(
+  surveyId: string,
+  options: { enabled?: boolean } = {},
+) {
+  return useQuery<QuestionAnalytics[]>({
+    queryKey: surveyKeys.analytics(surveyId),
+    queryFn: () => getSurveyAnalytics(surveyId),
+    enabled: !!surveyId && options.enabled !== false,
+    staleTime: 30_000,
+  });
+}
+
+export function useExportResponses() {
+  return useMutation({
+    mutationFn: (surveyId: string) => exportResponsesCsv(surveyId),
   });
 }

@@ -1,10 +1,18 @@
 import { Router } from "express";
 
-import { getMe } from "../controllers/user.controller.js";
+import {
+  changePassword,
+  getMe,
+  updateProfile,
+} from "../controllers/user.controller.js";
 import { authenticate } from "../middlewares/authenticate.js";
+import { csrf } from "../middlewares/csrf.js";
+import { originCheck } from "../middlewares/originCheck.js";
 
 const router = Router();
 
 router.get("/me", authenticate, getMe);
+router.patch("/profile", authenticate, originCheck, csrf, updateProfile);
+router.post("/password", authenticate, originCheck, csrf, changePassword);
 
 export default router;

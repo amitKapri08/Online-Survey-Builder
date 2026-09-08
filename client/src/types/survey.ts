@@ -36,6 +36,7 @@ export interface PublicSurvey {
   slug: string;
   status: SurveyStatus;
   isAnonymous: boolean;
+  allowMultipleResponses: boolean;
   questions: SurveyQuestion[];
 }
 
@@ -48,6 +49,7 @@ export interface SurveyAnswerInput {
 
 export interface SubmitResponsePayload {
   answers: SurveyAnswerInput[];
+  submitAnonymously?: boolean;
 }
 
 export interface SurveyQuestion {
@@ -136,3 +138,84 @@ export interface UpdateOptionPayload {
   optionText?: string;
   position?: number;
 }
+
+export type RespondentType = "authenticated" | "anonymous";
+
+export interface SurveyResponseAnswer {
+  questionId: string | null;
+  questionText: string;
+  questionType: QuestionType | null;
+  value: string | number | string[] | null;
+}
+
+export interface SurveyResponse {
+  responseId: string;
+  submittedAt: string;
+  respondentType: RespondentType;
+  answers: SurveyResponseAnswer[];
+}
+
+export interface ResponsesPage {
+  responses: SurveyResponse[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export type QuestionAnalytics =
+  | {
+      type: "CHOICE";
+      questionId: string;
+      questionText: string;
+      position: number;
+      total: number;
+      options: Array<{ optionId: string; optionText: string; count: number }>;
+    }
+  | {
+      type: "YES_NO";
+      questionId: string;
+      questionText: string;
+      position: number;
+      total: number;
+      yes: number;
+      no: number;
+    }
+  | {
+      type: "RATING";
+      questionId: string;
+      questionText: string;
+      position: number;
+      total: number;
+      min: number;
+      max: number;
+      average: number;
+      distribution: Array<{ value: number; count: number }>;
+    }
+  | {
+      type: "NUMBER";
+      questionId: string;
+      questionText: string;
+      position: number;
+      total: number;
+      min: number;
+      max: number;
+      average: number;
+    }
+  | {
+      type: "TEXT";
+      questionId: string;
+      questionText: string;
+      position: number;
+      total: number;
+      samples: Array<{ responseId: string; text: string; submittedAt: string }>;
+    }
+  | {
+      type: "DATE";
+      questionId: string;
+      questionText: string;
+      position: number;
+      total: number;
+      earliest: string | null;
+      latest: string | null;
+    };

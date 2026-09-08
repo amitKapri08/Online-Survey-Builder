@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ClipboardList, Pencil, Trash2 } from "lucide-react";
+import { ClipboardList, Copy, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,7 +27,11 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { useAuth } from "@/context/useAuth";
-import { useSurveys, useDeleteSurvey } from "@/hooks/useSurveyApi";
+import {
+  useSurveys,
+  useDeleteSurvey,
+  useDuplicateSurvey,
+} from "@/hooks/useSurveyApi";
 import { ROUTES } from "@/lib/routes";
 import { getApiErrorMessage } from "@/lib/apiError";
 import type { SurveyStatus } from "@/types/survey";
@@ -59,6 +62,16 @@ export default function SurveyListPage() {
 
   const { data, isLoading } = useSurveys({ page, limit: 10, status, search });
   const deleteMutation = useDeleteSurvey();
+  const duplicateMutation = useDuplicateSurvey();
+
+  const handleDuplicate = async (surveyId: string) => {
+    try {
+      const copy = await duplicateMutation.mutateAsync(surveyId);
+      toast.success(`Duplicated as "${copy.title}"`);
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Failed to duplicate survey"));
+    }
+  };
 
   const handleSearch = () => {
     setSearch(searchInput);
@@ -79,7 +92,7 @@ export default function SurveyListPage() {
   const surveys = data?.surveys ?? [];
 
   return (
-    <DashboardLayout>
+    <>
       <div className="mb-8">
         <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
           Welcome back, {firstName}!
@@ -95,7 +108,9 @@ export default function SurveyListPage() {
             <div>
               <CardTitle>Your surveys</CardTitle>
               <CardDescription>
-                {data ? `${data.total} total survey${data.total !== 1 ? "s" : ""}` : "Loading..."}
+                {data
+                  ? `${data.total} total survey${data.total !== 1 ? "s" : ""}`
+                  : "Loading..."}
               </CardDescription>
             </div>
             <Button
@@ -170,12 +185,19 @@ export default function SurveyListPage() {
                         variant="ghost"
                         size="icon-sm"
                         onClick={() =>
-                          navigate(
-                            ROUTES.SURVEY_EDIT.replace(":id", survey.id),
-                          )
+                          navigate(ROUTES.SURVEY_EDIT.replace(":id", survey.id))
                         }
                       >
                         <Pencil className="size-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => handleDuplicate(survey.id)}
+                        disabled={duplicateMutation.isPending}
+                        aria-label={`Duplicate ${survey.title}`}
+                      >
+                        <Copy className="size-4" />
                       </Button>
                       <Button
                         variant="ghost"
@@ -226,6 +248,6 @@ export default function SurveyListPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </DashboardLayout>
+    </>
   );
 }

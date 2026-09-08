@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCreateSurvey } from "@/hooks/useSurveyApi";
-import { createQuestion } from "@/services/survey.service";
+import { batchCreateQuestions } from "@/services/survey.service";
 import { ROUTES } from "@/lib/routes";
 import { getApiErrorMessage } from "@/lib/apiError";
 import { cn } from "@/lib/utils";
@@ -186,7 +186,10 @@ interface TemplateGalleryModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-function TemplateGalleryModal({ open, onOpenChange }: TemplateGalleryModalProps) {
+function TemplateGalleryModal({
+  open,
+  onOpenChange,
+}: TemplateGalleryModalProps) {
   const navigate = useNavigate();
   const createSurveyMutation = useCreateSurvey();
 
@@ -212,40 +215,17 @@ function TemplateGalleryModal({ open, onOpenChange }: TemplateGalleryModalProps)
       allowMultipleResponses: template.survey.allowMultipleResponses,
     });
 
-  const importQuestions = async (
-    surveyId: string,
-    questions: CreateQuestionPayload[],
-  ) => {
-    const failed: CreateQuestionPayload[] = [];
-    for (const question of questions) {
-      try {
-        await createQuestion(surveyId, question);
-      } catch {
-        failed.push(question);
-      }
-    }
-    return failed;
-  };
-
   const handleUseTemplate = async (template: SurveyTemplate) => {
     if (importingTemplateId) return;
     setImportingTemplateId(template.id);
     setFailedQuestions([]);
     try {
       const survey = await createSurvey(template);
-      const failed = await importQuestions(
-        survey.id,
-        template.survey.questions,
+      await batchCreateQuestions(survey.id, template.survey.questions);
+      toast.success(
+        `"${template.survey.title}" created with ${template.survey.questions.length} questions`,
       );
-      setFailedQuestions(failed);
-      if (failed.length === 0) {
-        toast.success(
-          `"${template.survey.title}" created with ${template.survey.questions.length} questions`,
-        );
-        navigate(
-          ROUTES.SURVEY_EDIT.replace(":id", survey.id),
-        );
-      }
+      navigate(ROUTES.SURVEY_EDIT.replace(":id", survey.id));
     } catch (error) {
       toast.error(getApiErrorMessage(error, "Failed to create survey"));
       setImportingTemplateId(null);
@@ -257,12 +237,10 @@ function TemplateGalleryModal({ open, onOpenChange }: TemplateGalleryModalProps)
     setImportingTemplateId(null);
     try {
       const survey = await createSurvey(activeTemplate);
-      const failed = await importQuestions(survey.id, failedQuestions);
-      if (failed.length === 0) {
-        setFailedQuestions([]);
-        toast.success("All questions imported");
-        navigate(ROUTES.SURVEY_EDIT.replace(":id", survey.id));
-      }
+      await batchCreateQuestions(survey.id, failedQuestions);
+      setFailedQuestions([]);
+      toast.success("All questions imported");
+      navigate(ROUTES.SURVEY_EDIT.replace(":id", survey.id));
     } catch (error) {
       toast.error(getApiErrorMessage(error, "Import failed"));
       setImportingTemplateId(activeTemplate.id);
@@ -352,7 +330,11 @@ function TemplateGalleryModal({ open, onOpenChange }: TemplateGalleryModalProps)
               Retry importing the remaining questions?
             </p>
             <div className="mt-2 flex gap-2">
-              <Button size="sm" variant="destructive" onClick={handleRetryFailed}>
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={handleRetryFailed}
+              >
                 Retry failed
               </Button>
               <Button

@@ -20,8 +20,27 @@ model User {
 
   refreshSessions RefreshSession[]
 
+  adminAuditLogs AdminAuditLog[]
+
+  deletedAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model AdminAuditLog {
+  id        String   @id @default(uuid())
+  actorId   String
+  action    String
+  targetId  String?
+  details   Json?
+  createdAt DateTime @default(now())
+
+  actor User @relation(fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@index([actorId])
+  @@index([targetId])
+  @@index([createdAt])
 }
 
 model RefreshSession {
@@ -124,12 +143,20 @@ model Response {
   userId String?
   user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
+  /// Stable per-respondent key for duplicate enforcement.
+  /// Authenticated: "user:<userId>"; anonymous: "anon:<sha256(visitorId)>".
+  responderKey String?
+
   answers Answer[]
 
   createdAt DateTime @default(now())
 
   @@index([surveyId])
+  @@index([surveyId, createdAt])
   @@index([userId])
+  // One response per survey per responder when allowMultipleResponses=false.
+  // NULL responderKey (allowMultipleResponses=true) stays dedupe-free.
+  @@unique([surveyId, responderKey])
 }
 
 model Answer {
@@ -138,8 +165,8 @@ model Answer {
   responseId String
   response   Response @relation(fields: [responseId], references: [id], onDelete: Cascade)
 
-  questionId String
-  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId String?
+  question   Question? @relation(fields: [questionId], references: [id], onDelete: SetNull)
 
   optionId String?
   option   QuestionOption? @relation(fields: [optionId], references: [id], onDelete: SetNull)
@@ -147,6 +174,12 @@ model Answer {
   answerText   String?
   answerNumber Float?
   answerDate   DateTime?
+
+  /// Historical snapshots preserved at submission time so results/exports
+  /// remain readable even if the question/option is later edited or deleted.
+  questionTextSnapshot     String?
+  optionTextSnapshot       String?
+  questionPositionSnapshot Int?
 
   createdAt DateTime @default(now())
 

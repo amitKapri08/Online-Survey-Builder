@@ -62,3 +62,18 @@ export async function getAdminStats(): Promise<AdminStats> {
   );
   return response.data.data.stats;
 }
+
+export async function updateAdminUserRole(
+  userId: string,
+  role: "USER" | "ADMIN",
+): Promise<AdminUser> {
+  const response = await apiClient.patch<ApiResponse<{ user: AdminUser }>>(
+    `/admin/users/${userId}/role`,
+    { role },
+  );
+  return response.data.data.user;
+}
+
+export async function deleteAdminUser(userId: string): Promise<void> {
+  await apiClient.delete(`/admin/users/${userId}`);
+}

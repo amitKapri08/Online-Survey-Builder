@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { ClipboardList, Plus, BarChart3, Users } from "lucide-react";
 
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,7 +20,7 @@ export default function DashboardPage() {
   const isAdmin = user?.role === "ADMIN";
 
   return (
-    <DashboardLayout>
+    <>
       <div className="mb-8">
         <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
           Welcome back, {firstName}!
@@ -76,6 +75,6 @@ export default function DashboardPage() {
           </Card>
         )}
       </div>
-    </DashboardLayout>
+    </>
   );
 }
