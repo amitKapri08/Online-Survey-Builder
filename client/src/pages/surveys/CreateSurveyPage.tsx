@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, LayoutTemplate } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowLeft, ChevronRight, LayoutDashboard, LayoutTemplate } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 
-import { TemplateGalleryModal } from "@/components/survey-builder";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -45,7 +44,6 @@ export default function CreateSurveyPage() {
   const navigate = useNavigate();
   const createMutation = useCreateSurvey();
   const [serverError, setServerError] = useState<string | null>(null);
-  const [templatesOpen, setTemplatesOpen] = useState(false);
 
   const {
     register,
@@ -80,16 +78,51 @@ export default function CreateSurveyPage() {
 
   return (
     <>
-      <div className="mb-8">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => navigate(ROUTES.SURVEYS)}
-          className="mb-4"
+      {/* Breadcrumb Navigation */}
+      <nav
+        aria-label="Breadcrumb"
+        className="mb-4 flex items-center gap-2 text-sm text-muted-foreground"
+      >
+        <Link
+          to={ROUTES.DASHBOARD}
+          className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground"
         >
-          <ArrowLeft data-icon="inline-start" />
-          Back to surveys
-        </Button>
+          <LayoutDashboard className="size-4" />
+          <span>Dashboard</span>
+        </Link>
+        <ChevronRight className="size-4 text-muted-foreground/60" />
+        <Link
+          to={ROUTES.SURVEYS}
+          className="transition-colors hover:text-foreground"
+        >
+          Surveys
+        </Link>
+        <ChevronRight className="size-4 text-muted-foreground/60" />
+        <span className="font-medium text-foreground">New Survey</span>
+      </nav>
+
+      <div className="mb-8">
+        <div className="mb-4 flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate(ROUTES.SURVEYS)}
+            className="gap-1.5"
+          >
+            <ArrowLeft className="size-4" />
+            Back to surveys
+          </Button>
+          <span className="text-muted-foreground/40">·</span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate(ROUTES.DASHBOARD)}
+            className="gap-1.5 text-muted-foreground hover:text-foreground"
+          >
+            <LayoutDashboard className="size-4" />
+            Back to dashboard
+          </Button>
+        </div>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
@@ -99,9 +132,9 @@ export default function CreateSurveyPage() {
               Start from scratch, or pick a template to get going faster.
             </p>
           </div>
-          <Button variant="brand" onClick={() => setTemplatesOpen(true)}>
+          <Button variant="brand" onClick={() => navigate(ROUTES.TEMPLATES)}>
             <LayoutTemplate data-icon="inline-start" />
-            Start from a template
+            Browse templates
           </Button>
         </div>
       </div>
@@ -204,7 +237,7 @@ export default function CreateSurveyPage() {
               </Button>
               <Button
                 type="submit"
-                variant="success"
+                variant="brand"
                 disabled={createMutation.isPending}
               >
                 {createMutation.isPending ? "Creating..." : "Create survey"}
@@ -213,11 +246,6 @@ export default function CreateSurveyPage() {
           </form>
         </CardContent>
       </Card>
-
-      <TemplateGalleryModal
-        open={templatesOpen}
-        onOpenChange={setTemplatesOpen}
-      />
     </>
   );
 }

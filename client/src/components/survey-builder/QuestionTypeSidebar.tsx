@@ -37,26 +37,28 @@ function TypeItem({
       {...attributes}
       {...listeners}
       className={cn(
-        "group flex w-full items-start gap-3 rounded-lg border p-3 text-left transition-colors",
+        "group relative flex w-full items-center gap-3 rounded-xl border border-border/70 bg-card p-2.5 text-left shadow-2xs transition-all duration-150",
         isEditable
-          ? "hover:border-foreground/40 hover:bg-muted"
+          ? "cursor-grab active:cursor-grabbing hover:border-brand-500/40 hover:bg-muted/40 hover:shadow-xs"
           : "cursor-not-allowed opacity-50",
-        isDragging && "opacity-30",
+        isDragging && "opacity-30 ring-2 ring-brand-500",
       )}
     >
-      <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground transition-colors group-hover:bg-foreground group-hover:text-background">
+      <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground transition-colors group-hover:bg-brand-500/10 group-hover:text-brand-600 dark:group-hover:text-brand-400">
         <Icon className="size-4" />
       </span>
+
       <span className="min-w-0 flex-1">
-        <span className="flex items-center justify-between gap-2">
-          <span className="text-sm font-medium text-foreground">
-            {type.label}
-          </span>
-          <Plus className="size-3.5 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+        <span className="block truncate text-xs font-semibold text-foreground">
+          {type.label}
         </span>
-        <span className="mt-0.5 block text-xs leading-relaxed text-muted-foreground">
+        <span className="block truncate text-[11px] text-muted-foreground">
           {type.description}
         </span>
+      </span>
+
+      <span className="flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100">
+        <Plus className="size-3.5" />
       </span>
     </button>
   );
@@ -65,13 +67,13 @@ function TypeItem({
 function QuestionTypeSidebar({ onSelect, isEditable }: QuestionTypeSidebarProps) {
   return (
     <aside className="lg:sticky lg:top-[73px]">
-      <div className="space-y-2">
-        <div className="space-y-1">
-          <h2 className="text-sm font-semibold text-foreground">
-            Question types
+      <div className="space-y-3">
+        <div>
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Question Palette
           </h2>
-          <p className="text-xs text-muted-foreground">
-            Click a type to add it, or drag it onto the canvas.
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Click to insert or drag onto the canvas.
           </p>
         </div>
         <div className="grid grid-cols-1 gap-2">

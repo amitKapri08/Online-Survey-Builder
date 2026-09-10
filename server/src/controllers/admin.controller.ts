@@ -3,6 +3,7 @@ import type { Request, Response, NextFunction } from "express";
 import {
   getAllUsers,
   getAllSurveys,
+  getAuditLogs,
   getStats,
   softDeleteUser,
   updateUserRole,
@@ -111,6 +112,25 @@ export const handleDeleteUser = async (
     res.status(200).json({
       success: true,
       message: "User deactivated",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const handleGetAuditLogs = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.min(50, Math.max(1, Number(req.query.limit) || 10));
+    const result = await getAuditLogs({ page, limit });
+
+    res.status(200).json({
+      success: true,
+      data: result,
     });
   } catch (error) {
     next(error);

@@ -7,8 +7,12 @@ export const ROUTES = {
   SURVEY_CREATE: "/surveys/new",
   SURVEY_EDIT: "/surveys/:id/edit",
   SURVEY_PUBLIC: "/s/:slug",
+  TEMPLATES: "/templates",
   PROFILE: "/account",
   ADMIN: "/admin",
+  ADMIN_AUDIT: "/admin/audit-logs",
+  ADMIN_USERS: "/admin/users",
+  ADMIN_SURVEYS: "/admin/surveys",
   PRIVACY_POLICY: "/privacy",
   TERMS_OF_USE: "/terms",
 } as const;

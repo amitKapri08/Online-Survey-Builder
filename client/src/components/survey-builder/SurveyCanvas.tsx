@@ -1,9 +1,7 @@
 import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { GripVertical, Pencil, Plus } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { QuestionEditor } from "@/components/question-builder/QuestionEditor";
 import { DraggableQuestionCard } from "./DraggableQuestionCard";
@@ -73,8 +71,8 @@ function SurveyCanvas({
     <div
       ref={setNodeRef}
       className={cn(
-        "min-h-[70vh] space-y-4 rounded-lg transition-shadow",
-        isOver && "ring-2 ring-foreground/60",
+        "min-h-[70vh] space-y-4 rounded-2xl transition-all duration-200",
+        isOver && "ring-2 ring-brand-500/80 bg-brand-500/[0.02]",
       )}
     >
       <SurveyHeaderCard
@@ -132,8 +130,19 @@ function SurveyCanvas({
       )}
 
       {isCreating && (
-        <Card className="data-pending:opacity-60" data-pending={isPending || undefined}>
-          <CardContent className="pt-6">
+        <Card
+          className="rounded-xl border border-border/80 bg-card shadow-xs data-pending:opacity-60"
+          data-pending={isPending || undefined}
+        >
+          <CardHeader className="flex-row items-center gap-3 p-4 pb-0 sm:p-5 sm:pb-0">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-brand-600 text-xs font-bold text-white shadow-2xs">
+              {String(questions.length + 1).padStart(2, "0")}
+            </div>
+            <span className="text-sm font-semibold text-foreground">
+              New Question
+            </span>
+          </CardHeader>
+          <CardContent className="p-4 sm:p-5 pt-3 sm:pt-3">
             <QuestionEditor
               isCreating
               isPending={isPending}
@@ -146,19 +155,19 @@ function SurveyCanvas({
       )}
 
       {isEditable && !isCreating && (
-        <div className="space-y-2">
-          <Button
-            variant="outline"
-            className="w-full border-dashed"
+        <div className="space-y-3 pt-1">
+          <button
+            type="button"
             onClick={onBeginCreate}
+            className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border/80 bg-background/50 py-3.5 text-sm font-semibold text-muted-foreground shadow-2xs transition-all duration-150 hover:border-brand-500/50 hover:bg-muted/40 hover:text-foreground"
           >
-            <Plus data-icon="inline-start" />
-            Add question
-          </Button>
+            <Plus className="size-4 text-brand-600 dark:text-brand-400" />
+            <span>Add Question</span>
+          </button>
           {questions.length > 0 && (
             <p className="flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground">
               <GripVertical className="size-3.5" />
-              Drag questions to reorder, or drop a type here to add
+              Drag questions to reorder, or drop a type from the palette
             </p>
           )}
         </div>

@@ -1,6 +1,15 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { ClipboardList, Copy, Pencil, Trash2 } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  ChevronRight,
+  ClipboardList,
+  Copy,
+  LayoutDashboard,
+  Pencil,
+  Plus,
+  Sparkles,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -26,7 +35,6 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
-import { useAuth } from "@/context/useAuth";
 import {
   useSurveys,
   useDeleteSurvey,
@@ -51,8 +59,6 @@ const STATUS_BADGE: Record<SurveyStatus, "draft" | "published" | "closed"> = {
 
 export default function SurveyListPage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const firstName = user?.name?.split(" ")[0] ?? "there";
 
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState("");
@@ -93,13 +99,58 @@ export default function SurveyListPage() {
 
   return (
     <>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-          Welcome back, {firstName}!
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Create, manage and analyze your surveys from here.
-        </p>
+      {/* Breadcrumb Navigation */}
+      <nav
+        aria-label="Breadcrumb"
+        className="mb-4 flex items-center gap-2 text-sm text-muted-foreground"
+      >
+        <Link
+          to={ROUTES.DASHBOARD}
+          className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground"
+        >
+          <LayoutDashboard className="size-4" />
+          <span>Dashboard</span>
+        </Link>
+        <ChevronRight className="size-4 text-muted-foreground/60" />
+        <span className="font-medium text-foreground">Surveys</span>
+      </nav>
+
+      {/* Page Heading & Action Bar */}
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            Surveys
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Create, manage, and analyze your surveys.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <Button
+            variant="outline"
+            onClick={() => navigate(ROUTES.DASHBOARD)}
+            className="gap-2"
+          >
+            <LayoutDashboard className="size-4" />
+            Dashboard
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => navigate(ROUTES.TEMPLATES)}
+            className="gap-2"
+          >
+            <Sparkles className="size-4 text-brand-600 dark:text-brand-400" />
+            Templates
+          </Button>
+          <Button
+            variant="brand"
+            onClick={() => navigate(ROUTES.SURVEY_CREATE)}
+            className="gap-2"
+          >
+            <Plus className="size-4" />
+            New survey
+          </Button>
+        </div>
       </div>
 
       <Card>
@@ -114,9 +165,11 @@ export default function SurveyListPage() {
               </CardDescription>
             </div>
             <Button
-              variant="success"
+              variant="brand"
               onClick={() => navigate(ROUTES.SURVEY_CREATE)}
+              className="gap-1.5"
             >
+              <Plus className="size-4" />
               New survey
             </Button>
           </div>

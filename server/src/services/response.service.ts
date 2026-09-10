@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import type { Prisma } from "../generated/prisma/client.js";
 import { prisma } from "../config/prisma.js";
 import { AppError } from "../utils/AppError.js";
+import { validateNumberAnswer } from "../utils/numberValidation.js";
 import type {
   SubmitResponseInput,
   ResponseQueryInput,
@@ -110,30 +111,32 @@ function buildAnswer(
     }
     case "NUMBER": {
       requireValue(label, value);
-      if (typeof value !== "number" || Number.isNaN(value)) {
-        throw new AppError(`${label} must be a number`, 400, "INVALID_ANSWER");
+      const validation = validateNumberAnswer(
+        value,
+        question.minValue,
+        question.maxValue,
+      );
+      if (!validation.valid) {
+        switch (validation.code) {
+          case "INVALID_NUMBER":
+            throw new AppError(`${label} must be a number`, 400, "INVALID_ANSWER");
+          case "NOT_AN_INTEGER":
+            throw new AppError(`${label} must be a whole number`, 400, "INVALID_ANSWER");
+          case "LESS_THAN_MIN":
+            throw new AppError(
+              `${label} must be at least ${question.minValue}`,
+              400,
+              "INVALID_ANSWER",
+            );
+          case "GREATER_THAN_MAX":
+            throw new AppError(
+              `${label} must be at most ${question.maxValue}`,
+              400,
+              "INVALID_ANSWER",
+            );
+        }
       }
-      if (
-        question.minValue != null &&
-        (value < question.minValue || !Number.isInteger(value))
-      ) {
-        throw new AppError(
-          `${label} must be at least ${question.minValue}`,
-          400,
-          "INVALID_ANSWER",
-        );
-      }
-      if (
-        question.maxValue != null &&
-        (value > question.maxValue || !Number.isInteger(value))
-      ) {
-        throw new AppError(
-          `${label} must be at most ${question.maxValue}`,
-          400,
-          "INVALID_ANSWER",
-        );
-      }
-      return { ...link, ...snapshots(), answerNumber: value };
+      return { ...link, ...snapshots(), answerNumber: value as number };
     }
     case "RATING": {
       requireValue(label, value);

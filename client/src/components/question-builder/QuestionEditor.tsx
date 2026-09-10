@@ -1,7 +1,7 @@
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Plus, Trash2 } from "lucide-react";
+import { GripVertical, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -291,9 +291,11 @@ function QuestionEditor({
         )}
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="question-type">Question type</Label>
+      <div className="grid gap-4 sm:grid-cols-2 sm:items-center">
+        <div className="space-y-1.5">
+          <Label htmlFor="question-type" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            Question type
+          </Label>
           <Select
             id="question-type"
             placeholder="Choose a type"
@@ -307,15 +309,22 @@ function QuestionEditor({
             </p>
           )}
         </div>
-        <div className="flex items-end pb-2">
-          <Label className="flex cursor-pointer items-center gap-2 text-sm font-medium">
-            <input
-              type="checkbox"
-              className="size-4 rounded border-input"
-              {...register("isRequired")}
-            />
-            Required question
-          </Label>
+
+        <div className="flex items-center justify-start sm:justify-end sm:pt-5">
+          <label className="inline-flex cursor-pointer items-center gap-3">
+            <span className="text-sm font-medium text-foreground">
+              Required
+            </span>
+            <div className="relative inline-flex items-center">
+              <input
+                type="checkbox"
+                id="is-required-toggle"
+                className="peer sr-only"
+                {...register("isRequired")}
+              />
+              <div className="h-5 w-9 rounded-full bg-muted ring-1 ring-border/80 transition-colors peer-checked:bg-brand-600 peer-checked:ring-brand-600 peer-focus-visible:ring-2 peer-focus-visible:ring-brand-500/50 after:absolute after:top-[2px] after:left-[2px] after:size-4 after:rounded-full after:bg-white after:shadow-xs after:transition-all after:content-[''] peer-checked:after:translate-x-4 dark:bg-zinc-800" />
+            </div>
+          </label>
         </div>
       </div>
 
@@ -398,23 +407,27 @@ function QuestionEditor({
             {optionsField.fields.map((fieldItem, index) => (
               <div
                 key={fieldItem.id}
-                className="flex items-start gap-2"
+                className="group flex items-center gap-2 rounded-xl border border-border/80 bg-muted/20 px-3 py-1 shadow-2xs transition-all focus-within:border-brand-500 focus-within:ring-2 focus-within:ring-brand-500/20 hover:bg-muted/40"
               >
-                <Input
+                <GripVertical className="size-4 text-muted-foreground/40 shrink-0" />
+                <input
+                  type="text"
                   placeholder={`Option ${index + 1}`}
                   aria-label={`Option ${index + 1}`}
                   {...register(`options.${index}.optionText`)}
+                  className="w-full border-0 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/60 outline-none"
                   aria-invalid={!!errors.options?.[index]?.optionText}
                 />
                 <Button
                   type="button"
-                  variant="outline"
-                  size="icon-sm"
+                  variant="ghost"
+                  size="icon-xs"
                   onClick={() => optionsField.remove(index)}
                   aria-label={`Remove option ${index + 1}`}
                   disabled={optionsField.fields.length <= 2}
+                  className="rounded-lg text-muted-foreground hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 disabled:opacity-30"
                 >
-                  <Trash2 />
+                  <Trash2 className="size-3.5" />
                 </Button>
               </div>
             ))}

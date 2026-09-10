@@ -22,7 +22,7 @@ export function useAutosaveField<T>({
   const saveKey = `${resourceType}:${resourceId}:${fieldName}`;
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pendingValueRef = useRef<T | null>(null);
+  const pendingRef = useRef<{ value: T } | null>(null);
   const pendingSavePromiseRef = useRef<Promise<void> | null>(null);
   const onSaveRef = useRef(onSave);
 
@@ -52,16 +52,16 @@ export function useAutosaveField<T>({
   const setValue = useCallback(
     (value: T) => {
       if (!enabled) return;
-      pendingValueRef.current = value;
+      pendingRef.current = { value };
       if (timerRef.current) {
         clearTimeout(timerRef.current);
       }
       timerRef.current = setTimeout(() => {
         timerRef.current = null;
-        const latest = pendingValueRef.current;
-        pendingValueRef.current = null;
-        if (latest !== null) {
-          void doSave(latest);
+        const pending = pendingRef.current;
+        pendingRef.current = null;
+        if (pending !== null) {
+          void doSave(pending.value);
         }
       }, debounceMs);
     },
@@ -69,14 +69,14 @@ export function useAutosaveField<T>({
   );
 
   const flush = useCallback(() => {
-    const latest = pendingValueRef.current;
+    const pending = pendingRef.current;
     if (timerRef.current) {
       clearTimeout(timerRef.current);
       timerRef.current = null;
-      pendingValueRef.current = null;
+      pendingRef.current = null;
     }
-    if (latest !== null) {
-      return doSave(latest);
+    if (pending !== null) {
+      return doSave(pending.value);
     }
     return pendingSavePromiseRef.current ?? Promise.resolve();
   }, [doSave]);
@@ -88,7 +88,7 @@ export function useAutosaveField<T>({
       if (timerRef.current) {
         clearTimeout(timerRef.current);
         timerRef.current = null;
-        pendingValueRef.current = null;
+        pendingRef.current = null;
       }
     };
   }, [saveKey, flush, registerPendingFlush, unregisterPendingFlush]);

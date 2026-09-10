@@ -43,6 +43,7 @@ export function RegisterForm() {
   });
 
   const password = watch("password");
+  const passwordStrength = getPasswordStrength(password || "");
 
   const onSubmit = async (values: RegisterFormValues) => {
     setServerError(null);
@@ -76,35 +77,34 @@ export function RegisterForm() {
 
   const isSubmitting = registerMutation.isPending;
 
-  const passwordRequirements = [
-    {
-      label: "At least 8 characters",
-      valid: password.length >= 8,
-    },
-    {
-      label: "Contains an uppercase letter",
-      valid: /[A-Z]/.test(password),
-    },
-    {
-      label: "Contains a lowercase letter",
-      valid: /[a-z]/.test(password),
-    },
-    {
-      label: "Contains a number",
-      valid: /[0-9]/.test(password),
-    },
-    {
-      label: "Contains a special character",
-      valid: /[!@#$%^&*(),.?":{}|<>]/.test(password),
-    },
-  ];
+function getPasswordStrength(pwd: string): {
+  score: number;
+  label: string;
+  color: string;
+  percent: number;
+} {
+  if (!pwd) return { score: 0, label: "Not set", color: "bg-muted", percent: 0 };
+  let score = 0;
+  if (pwd.length >= 8) score += 1;
+  if (/[A-Z]/.test(pwd)) score += 1;
+  if (/[0-9]/.test(pwd)) score += 1;
+  if (/[^A-Za-z0-9]/.test(pwd)) score += 1;
+
+  if (score <= 1)
+    return { score, label: "Weak", color: "bg-danger-500", percent: 25 };
+  if (score === 2)
+    return { score, label: "Fair", color: "bg-amber-500", percent: 50 };
+  if (score === 3)
+    return { score, label: "Good", color: "bg-blue-500", percent: 75 };
+  return { score, label: "Strong", color: "bg-emerald-500", percent: 100 };
+}
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
       {serverError && (
         <div
           role="alert"
-          className="rounded-lg border border-danger-200 bg-danger-50 px-4 py-3 text-sm text-danger-700"
+          className="rounded-xl border border-danger-200 bg-danger-50 px-4 py-3 text-sm text-danger-700 dark:border-danger-900/50 dark:bg-danger-950/40 dark:text-danger-400"
         >
           {serverError}
         </div>
@@ -147,34 +147,41 @@ export function RegisterForm() {
         {...register("password")}
       />
 
-      {/* Password requirements */}
-      <div className="space-y-2">
-        {passwordRequirements.map((requirement) => (
-          <div
-            key={requirement.label}
-            className="flex items-center gap-2 text-xs"
-          >
+      {/* Dynamic Password Strength Slider / Meter */}
+      {password.length > 0 && (
+        <div className="space-y-1.5 pt-0.5">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-[11px] text-muted-foreground">Password strength</span>
             <span
               className={cn(
-                "flex size-4 items-center justify-center rounded-full text-[10px]",
-                requirement.valid
-                  ? "bg-success-100 text-success-600"
-                  : "bg-muted text-muted-foreground",
+                "font-semibold text-[11px]",
+                passwordStrength.score <= 1
+                  ? "text-danger-500"
+                  : passwordStrength.score === 2
+                    ? "text-amber-500"
+                    : passwordStrength.score === 3
+                      ? "text-blue-500"
+                      : "text-emerald-500",
               )}
             >
-              {requirement.valid ? "✓" : "•"}
-            </span>
-
-            <span
-              className={
-                requirement.valid ? "text-success-600" : "text-muted-foreground"
-              }
-            >
-              {requirement.label}
+              {passwordStrength.label}
             </span>
           </div>
-        ))}
-      </div>
+
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+            <div
+              className={cn(
+                "h-full rounded-full transition-all duration-300",
+                passwordStrength.color,
+              )}
+              style={{ width: `${passwordStrength.percent}%` }}
+            />
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            Must be at least 8 chars with an uppercase, number & symbol.
+          </p>
+        </div>
+      )}
 
       {/* Confirm password */}
       <PasswordInput
@@ -237,9 +244,8 @@ export function RegisterForm() {
       {/* Submit */}
       <Button
         type="submit"
-        variant="success"
-        size="xl"
-        className="w-full font-semibold"
+        variant="brand"
+        className="w-full h-11 rounded-xl font-semibold shadow-md shadow-brand-500/20"
         disabled={isSubmitting}
       >
         {isSubmitting ? "Creating account..." : "Create account"}
@@ -254,9 +260,9 @@ export function RegisterForm() {
         Already have an account?{" "}
         <Link
           to={ROUTES.LOGIN}
-          className="font-semibold text-success-600 hover:text-success-700"
+          className="font-semibold text-brand-600 hover:text-brand-700 hover:underline"
         >
-          Login
+          Sign in
         </Link>
       </p>
     </form>

@@ -1,8 +1,9 @@
 import { useRef, useState } from "react";
-import { ArrowLeft, Send, Share2 } from "lucide-react";
+import { ChevronLeft, Pencil, Send, Share2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme";
 import { SaveStatus } from "./SaveStatus";
 import { TabNavigation } from "./TabNavigation";
 import type { BuilderTab } from "./TabNavigation";
@@ -60,42 +61,48 @@ function BuilderHeader({
   };
 
   return (
-    <div className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex items-center gap-4 px-4 py-3 sm:px-6">
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={() => navigate(ROUTES.SURVEYS)}
-          aria-label="Back to surveys"
-        >
-          <ArrowLeft />
-        </Button>
+    <div className="sticky top-0 z-40 border-b border-border/80 bg-background/90 backdrop-blur-md">
+      <div className="flex items-center justify-between gap-4 px-4 py-3 sm:px-6">
+        {/* Left: Back Arrow + Editable Survey Title Pill */}
+        <div className="flex items-center gap-3 overflow-hidden">
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            onClick={() => navigate(ROUTES.SURVEYS)}
+            aria-label="Back to surveys"
+            className="rounded-lg text-muted-foreground hover:text-foreground"
+          >
+            <ChevronLeft className="size-5" />
+          </Button>
 
-        <div className="flex flex-1 items-center gap-3 overflow-hidden">
-          {isEditingTitle ? (
-            <input
-              ref={titleInputRef}
-              type="text"
-              value={draftTitle}
-              onChange={(e) => setDraftTitle(e.target.value)}
-              onBlur={handleTitleBlur}
-              onKeyDown={handleTitleKeyDown}
-              className="w-full max-w-md truncate border-b border-foreground bg-transparent text-lg font-bold outline-none sm:text-xl"
-              autoFocus
-            />
-          ) : (
-            <button
-              type="button"
-              onClick={handleStartEditing}
-              className="max-w-md cursor-pointer truncate rounded px-1 text-lg font-bold hover:bg-muted sm:text-xl"
-              title="Click to edit title"
-            >
-              {title}
-            </button>
-          )}
-          <SaveStatus />
+          <div className="flex items-center gap-2.5 overflow-hidden">
+            {isEditingTitle ? (
+              <input
+                ref={titleInputRef}
+                type="text"
+                value={draftTitle}
+                onChange={(e) => setDraftTitle(e.target.value)}
+                onBlur={handleTitleBlur}
+                onKeyDown={handleTitleKeyDown}
+                className="max-w-xs sm:max-w-sm rounded-lg border border-brand-500 bg-background px-3 py-1 text-sm font-semibold text-foreground outline-none ring-2 ring-brand-500/20"
+                autoFocus
+              />
+            ) : (
+              <button
+                type="button"
+                onClick={handleStartEditing}
+                className="group flex max-w-xs sm:max-w-sm items-center gap-2 rounded-lg border border-border/70 bg-muted/30 px-3 py-1.5 text-sm font-semibold text-foreground transition-colors hover:border-border hover:bg-muted/60"
+                title="Click to rename survey"
+              >
+                <span className="truncate">{title}</span>
+                <Pencil className="size-3.5 shrink-0 text-muted-foreground opacity-60 transition-opacity group-hover:opacity-100" />
+              </button>
+            )}
+            <SaveStatus />
+          </div>
         </div>
 
+        {/* Center: Tabs on Desktop */}
         <div className="hidden md:block">
           <TabNavigation
             activeTab={activeTab}
@@ -104,23 +111,36 @@ function BuilderHeader({
           />
         </div>
 
-        <div className="flex items-center gap-2">
-          {status !== "DRAFT" && (
-            <Button variant="outline" size="sm" onClick={onShare}>
-              <Share2 data-icon="inline-start" />
-              Share
+        {/* Right: Theme Toggle & Publish / Share Actions */}
+        <div className="flex items-center gap-2.5">
+          <ThemeToggle />
+
+          {status !== "DRAFT" ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onShare}
+              className="gap-1.5 shadow-2xs"
+            >
+              <Share2 className="size-4 text-muted-foreground" />
+              <span>Share</span>
             </Button>
-          )}
-          {status === "DRAFT" && (
-            <Button variant="success" size="sm" onClick={onPublish}>
-              <Send data-icon="inline-start" />
-              Publish
+          ) : (
+            <Button
+              variant="brand"
+              size="sm"
+              onClick={onPublish}
+              className="gap-1.5 shadow-xs"
+            >
+              <Send className="size-4" />
+              <span>Publish</span>
             </Button>
           )}
         </div>
       </div>
 
-      <div className="border-t px-4 py-2 sm:hidden">
+      {/* Mobile Tab Navigation Strip */}
+      <div className="border-t border-border/60 px-4 py-2 sm:hidden">
         <TabNavigation
           activeTab={activeTab}
           onTabChange={onTabChange}

@@ -40,7 +40,7 @@ export function PasswordInput({
           placeholder={placeholder}
           disabled={disabled}
           aria-invalid={error ? true : undefined}
-          className={cn("h-11 pl-10 pr-11")}
+          className={cn("h-11 rounded-xl border-border bg-background/50 pl-10 pr-11")}
           {...props}
         />
 

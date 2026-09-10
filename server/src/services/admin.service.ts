@@ -117,16 +117,37 @@ export const getAllSurveys = async (query: { page: number; limit: number; status
 };
 
 export const getStats = async () => {
-  const [totalUsers, totalSurveys, totalResponses] = await Promise.all([
+  const [
+    totalUsers,
+    totalSurveys,
+    totalResponses,
+    viewsAggregate,
+    draftCount,
+    publishedCount,
+    closedCount,
+    totalQuestions,
+  ] = await Promise.all([
     prisma.user.count({ where: ACTIVE_USER_WHERE }),
     prisma.survey.count(),
     prisma.response.count(),
+    prisma.survey.aggregate({ _sum: { viewCount: true } }),
+    prisma.survey.count({ where: { status: "DRAFT" } }),
+    prisma.survey.count({ where: { status: "PUBLISHED" } }),
+    prisma.survey.count({ where: { status: "CLOSED" } }),
+    prisma.question.count(),
   ]);
 
   return {
     totalUsers,
     totalSurveys,
     totalResponses,
+    totalViews: viewsAggregate._sum.viewCount ?? 0,
+    totalQuestions,
+    surveysByStatus: {
+      draft: draftCount,
+      published: publishedCount,
+      closed: closedCount,
+    },
   };
 };
 
@@ -218,3 +239,41 @@ export const softDeleteUser = async (actorId: string, targetUserId: string) => {
 
   return { id: targetUserId, deletedAt };
 };
+
+export const getAuditLogs = async (query: { page: number; limit: number }) => {
+  const { page, limit } = query;
+  const skip = (page - 1) * limit;
+
+  const [logs, total] = await Promise.all([
+    prisma.adminAuditLog.findMany({
+      select: {
+        id: true,
+        actorId: true,
+        action: true,
+        targetId: true,
+        details: true,
+        createdAt: true,
+        actor: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+    }),
+    prisma.adminAuditLog.count(),
+  ]);
+
+  return {
+    logs,
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  };
+};
+
