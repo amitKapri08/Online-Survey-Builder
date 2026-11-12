@@ -2,7 +2,13 @@ import type { Request, Response, NextFunction } from "express";
 
 import { loginSchema, registerSchema } from "../validators/auth.validator.js";
 import { loginUser, registerUser } from "../services/auth.service.js";
-import { clearAuthCookie, clearRefreshTokenCookie, clearCsrfCookie, setAuthCookie, setRefreshTokenCookie } from "../utils/cookies.js";
+import {
+  clearAuthCookie,
+  clearRefreshTokenCookie,
+  clearCsrfCookie,
+  setAuthCookie,
+  setRefreshTokenCookie,
+} from "../utils/cookies.js";
 
 export const register = async (
   req: Request,

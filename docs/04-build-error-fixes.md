@@ -6,7 +6,7 @@ Three errors surfaced while setting up the generated Prisma client. All were res
 
 > Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'.
 
-**Cause:** `tsconfig.json` uses `module: nodenext` + `moduleResolution: NodeNext`. ESM relative imports must end in `.js` (the extension of the *compiled* file).
+**Cause:** `tsconfig.json` uses `module: nodenext` + `moduleResolution: NodeNext`. ESM relative imports must end in `.js` (the extension of the _compiled_ file).
 
 **Fix:** `src/config/prisma.ts` now imports `../generated/prisma/client.js` (with the `.js`) — matching the existing convention in `src/server.ts` (`./app.js`).
 
@@ -23,6 +23,7 @@ Three errors surfaced while setting up the generated Prisma client. All were res
 **Cause:** The new `prisma-client` generator emits **TypeScript** files, and `tsconfig.json` sets `rootDir: "./src"`. Importing a file outside `src` violates `rootDir`.
 
 **Fix:**
+
 - Moved the generator output into `src` in `schema.prisma`:
   ```prisma
   generator client {

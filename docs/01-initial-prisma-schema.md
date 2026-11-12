@@ -6,14 +6,14 @@ Created the initial database schema at `server/prisma/schema.prisma` using Postg
 
 ## Models
 
-| Model | Purpose |
-|-------|---------|
-| `User` | Registered users who create surveys. Has unique `email`, name, and hashed `password`. |
-| `Survey` | A survey owned by a user, with title, description, and lifecycle `status` (`DRAFT` / `PUBLISHED` / `CLOSED`). |
-| `Question` | Questions within a survey. Ordered by `position`, supports `isRequired`, and has a `QuestionType`. |
-| `QuestionOption` | Choice options for single/multiple-choice, dropdown. Ordered by `position`. |
-| `Response` | A submitted response to a survey. `userId` is nullable → supports anonymous surveys. |
-| `Answer` | One answer to a question within a response. Flexible value columns cover text/number/date or a selected `optionId`. |
+| Model            | Purpose                                                                                                             |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `User`           | Registered users who create surveys. Has unique `email`, name, and hashed `password`.                               |
+| `Survey`         | A survey owned by a user, with title, description, and lifecycle `status` (`DRAFT` / `PUBLISHED` / `CLOSED`).       |
+| `Question`       | Questions within a survey. Ordered by `position`, supports `isRequired`, and has a `QuestionType`.                  |
+| `QuestionOption` | Choice options for single/multiple-choice, dropdown. Ordered by `position`.                                         |
+| `Response`       | A submitted response to a survey. `userId` is nullable → supports anonymous surveys.                                |
+| `Answer`         | One answer to a question within a response. Flexible value columns cover text/number/date or a selected `optionId`. |
 
 ## Question types covered
 

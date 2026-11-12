@@ -1,3 +1,6 @@
+// NOTE: The client duplicates these validation rules in
+// client/src/schemas/auth.schema.ts. Keep both files in sync when changing
+// password/email rules, or consider a shared packages/shared schema package.
 import { z } from "zod";
 
 export const registerSchema = z.object({

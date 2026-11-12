@@ -57,11 +57,24 @@ model Survey {
 
   questions Question[]
   responses Response[]
+  surveyViews SurveyView[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([userId])
+}
+
+model SurveyView {
+  id         String   @id @default(uuid())
+  surveyId   String
+  visitorKey String
+  createdAt  DateTime @default(now())
+
+  survey Survey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+
+  @@unique([surveyId, visitorKey])
+  @@index([surveyId])
 }
 
 model Question {

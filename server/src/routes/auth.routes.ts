@@ -5,7 +5,7 @@ import { csrf } from "../middlewares/csrf.js";
 import { originCheck } from "../middlewares/originCheck.js";
 import { generateCsrfToken } from "../utils/csrf.js";
 import { setCsrfCookie } from "../utils/cookies.js";
-import { authLimiter } from "../middlewares/rateLimit.js";
+import { authLimiter, refreshLimiter } from "../middlewares/rateLimit.js";
 import { refresh } from "../controllers/refresh.controller.js";
 
 const router = Router();
@@ -21,31 +21,9 @@ router.get("/csrf", (_req, res) => {
   });
 });
 
-router.post(
-  "/register",
-  originCheck,
-  authLimiter,
-  csrf,
-  register,
-);
-router.post(
-  "/login",
-  originCheck,
-  authLimiter,
-  csrf,
-  login,
-);
-router.post(
-  "/refresh",
-  originCheck,
-  csrf,
-  refresh,
-);
-router.post(
-  "/logout",
-  originCheck,
-  csrf,
-  logout,
-);
+router.post("/register", originCheck, authLimiter, csrf, register);
+router.post("/login", originCheck, authLimiter, csrf, login);
+router.post("/refresh", originCheck, refreshLimiter, csrf, refresh);
+router.post("/logout", originCheck, csrf, logout);
 
 export default router;

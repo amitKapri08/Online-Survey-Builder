@@ -1,9 +1,17 @@
 import type { Request, Response, NextFunction } from "express";
 
-import { hashRefreshToken, generateRefreshToken, signToken } from "../utils/jwt.js";
+import {
+  hashRefreshToken,
+  generateRefreshToken,
+  signToken,
+} from "../utils/jwt.js";
 import { prisma } from "../config/prisma.js";
 import { AppError } from "../utils/AppError.js";
-import { setAuthCookie, setRefreshTokenCookie } from "../utils/cookies.js";
+import {
+  setAuthCookie,
+  setRefreshTokenCookie,
+  getRefreshTokenExpiryDate,
+} from "../utils/cookies.js";
 
 export const refresh = async (
   req: Request,
@@ -25,36 +33,60 @@ export const refresh = async (
       },
     });
 
-    if (!session || session.revokedAt !== null) {
-      throw new AppError("Invalid or revoked refresh token", 401);
+    if (!session) {
+      throw new AppError("Invalid refresh token", 401);
+    }
+
+    if (session.revokedAt !== null) {
+      await prisma.refreshSession.updateMany({
+        where: { familyId: session.familyId },
+        data: { revokedAt: new Date() },
+      });
+      throw new AppError("Refresh token has been revoked", 401);
     }
 
     if (session.expiresAt < new Date()) {
       throw new AppError("Refresh token expired", 401);
     }
 
-    await prisma.refreshSession.update({
-      where: { id: session.id },
-      data: { revokedAt: new Date() },
+    const user = await prisma.user.findUnique({
+      where: { id: session.userId },
     });
+
+    if (!user) {
+      throw new AppError("User not found", 401);
+    }
+
+    const [{ count }] = await prisma.$transaction([
+      prisma.refreshSession.updateMany({
+        where: { id: session.id, revokedAt: null },
+        data: { revokedAt: new Date() },
+      }),
+    ]);
+
+    if (count === 0) {
+      await prisma.refreshSession.updateMany({
+        where: { familyId: session.familyId },
+        data: { revokedAt: new Date() },
+      });
+      throw new AppError("Refresh token has been reused", 401);
+    }
 
     const newRefreshToken = generateRefreshToken();
     const newTokenHash = hashRefreshToken(newRefreshToken);
 
-    const familyId = session.familyId;
-
     await prisma.refreshSession.create({
       data: {
         userId: session.userId,
-        familyId,
+        familyId: session.familyId,
         tokenHash: newTokenHash,
-        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        expiresAt: getRefreshTokenExpiryDate(),
       },
     });
 
     const accessToken = signToken({
       userId: session.userId,
-      role: "USER",
+      role: user.role,
     });
 
     setAuthCookie(res, accessToken);

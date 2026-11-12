@@ -1,6 +1,7 @@
-import { Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { ClipboardList, Plus, BarChart3, Users } from "lucide-react";
 
-import { DashboardHeader } from "@/components/dashboard";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,53 +11,71 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useAuth } from "@/context/useAuth";
+import { ROUTES } from "@/lib/routes";
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const firstName = user?.name?.split(" ")[0] ?? "there";
+  const isAdmin = user?.role === "ADMIN";
 
   return (
-    <div className="min-h-screen bg-muted">
-      <DashboardHeader />
+    <DashboardLayout>
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          Welcome back, {firstName}!
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Create, manage and analyze your surveys from here.
+        </p>
+      </div>
 
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-            Welcome back, {firstName}!
-          </h1>
-
-          <p className="mt-1 text-sm text-muted-foreground">
-            Create, manage and analyze your surveys from here.
-          </p>
-        </div>
-
-        <Card>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Card
+          className="cursor-pointer transition-colors hover:ring-2 hover:ring-ring/50"
+          onClick={() => navigate(ROUTES.SURVEYS)}
+        >
           <CardHeader>
-            <CardTitle>Your surveys</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <ClipboardList className="size-5 text-brand-600" />
+              My surveys
+            </CardTitle>
             <CardDescription>
-              Your surveys will appear here once you create one.
+              View, create and manage your surveys.
             </CardDescription>
           </CardHeader>
-
-          <CardContent className="flex flex-col items-center justify-center gap-4 py-16 text-center">
-            <p className="max-w-sm text-sm text-muted-foreground">
-              This is the dashboard shell. Survey creation and management will
-              be added here as the project evolves.
-            </p>
-
-            <Button
-              variant="success"
-              size="xl"
-              className="w-full max-w-xs"
-              disabled
-            >
+          <CardContent>
+            <Button variant="success" className="w-full">
               <Plus data-icon="inline-start" />
-              Create your first survey
+              Create survey
             </Button>
           </CardContent>
         </Card>
-      </main>
-    </div>
+
+        {isAdmin && (
+          <Card
+            className="cursor-pointer transition-colors hover:ring-2 hover:ring-ring/50"
+            onClick={() => navigate(ROUTES.ADMIN)}
+          >
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <BarChart3 className="size-5 text-success-600" />
+                Admin panel
+              </CardTitle>
+              <CardDescription>
+                Platform stats, user management and oversight.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Users className="size-4" />
+                Manage users and surveys
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    </DashboardLayout>
   );
 }

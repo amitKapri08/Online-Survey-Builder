@@ -8,24 +8,24 @@ submit surveys, and administrators to manage and monitor the platform.
 
 ### Primary goals
 
--   User registration and authentication
--   Survey creation and management
--   Dynamic question and option management
--   Public survey sharing
--   Response collection
--   Analytics and reporting
--   Exporting results
--   Email notifications
--   Role-based access control
--   Administrative management
--   Audit logging and system monitoring
--   Scalable deployment architecture
+- User registration and authentication
+- Survey creation and management
+- Dynamic question and option management
+- Public survey sharing
+- Response collection
+- Analytics and reporting
+- Exporting results
+- Email notifications
+- Role-based access control
+- Administrative management
+- Audit logging and system monitoring
+- Scalable deployment architecture
 
-------------------------------------------------------------------------
+---
 
 # 2. High-Level Architecture
 
-``` text
+```text
                          ┌───────────────────────────────┐
                          │         USERS / ROLES         │
                          │                               │
@@ -87,7 +87,7 @@ submit surveys, and administrators to manage and monitor the platform.
                               └───────────────┘
 ```
 
-------------------------------------------------------------------------
+---
 
 # 3. User Roles
 
@@ -97,19 +97,19 @@ A registered user who creates and manages surveys.
 
 Responsibilities:
 
--   Create surveys
--   Edit surveys
--   Delete surveys
--   Add and manage questions
--   Add and manage options
--   Publish surveys
--   Generate/share survey links
--   View responses
--   View analytics
--   Export results
--   Manage profile and settings
+- Create surveys
+- Edit surveys
+- Delete surveys
+- Add and manage questions
+- Add and manage options
+- Publish surveys
+- Generate/share survey links
+- View responses
+- View analytics
+- Export results
+- Manage profile and settings
 
-------------------------------------------------------------------------
+---
 
 ## 3.2 Respondent
 
@@ -117,15 +117,15 @@ A person who fills out a survey.
 
 Responsibilities:
 
--   Open a public survey link
--   View survey questions
--   Submit responses
--   Receive confirmation where applicable
+- Open a public survey link
+- View survey questions
+- Submit responses
+- Receive confirmation where applicable
 
 Respondents may optionally be anonymous depending on the survey
 configuration.
 
-------------------------------------------------------------------------
+---
 
 ## 3.3 Administrator
 
@@ -133,15 +133,15 @@ A privileged platform user.
 
 Responsibilities:
 
--   Manage users
--   Manage surveys
--   Monitor responses
--   Manage platform settings
--   Review audit logs
--   Monitor system health
--   Handle administrative operations
+- Manage users
+- Manage surveys
+- Monitor responses
+- Manage platform settings
+- Review audit logs
+- Monitor system health
+- Handle administrative operations
 
-------------------------------------------------------------------------
+---
 
 # 4. Client Layer
 
@@ -151,17 +151,17 @@ The client layer is responsible for presenting the application to users.
 
 ### Technology
 
--   React.js
--   React Router
--   TypeScript (recommended)
--   Tailwind CSS
--   Axios or Fetch API
--   React Query / TanStack Query (recommended)
--   Chart.js or Recharts
+- React.js
+- React Router
+- TypeScript (recommended)
+- Tailwind CSS
+- Axios or Fetch API
+- React Query / TanStack Query (recommended)
+- Chart.js or Recharts
 
 ### Main frontend areas
 
-``` text
+```text
 Frontend
 │
 ├── Authentication
@@ -226,24 +226,24 @@ Frontend
     └── Submit Response
 ```
 
-------------------------------------------------------------------------
+---
 
 # 5. Backend Application Layer
 
 ## Technology
 
--   Node.js
--   Express.js
--   TypeScript
--   Prisma ORM
--   PostgreSQL
--   Zod for validation
--   JWT or secure cookie-based authentication
--   Winston/Pino for logging
+- Node.js
+- Express.js
+- TypeScript
+- Prisma ORM
+- PostgreSQL
+- Zod for validation
+- JWT or secure cookie-based authentication
+- Winston/Pino for logging
 
 The backend exposes RESTful APIs consumed by the React frontend.
 
-------------------------------------------------------------------------
+---
 
 # 6. Backend Modules
 
@@ -253,23 +253,23 @@ Responsible for authentication and account security.
 
 Responsibilities:
 
--   User registration
--   Login
--   Logout
--   Password hashing
--   Password reset
--   Email verification
--   Authentication token/session management
--   Authentication middleware
+- User registration
+- Login
+- Logout
+- Password hashing
+- Password reset
+- Email verification
+- Authentication token/session management
+- Authentication middleware
 
 Possible technologies:
 
--   bcrypt / argon2
--   JWT
--   HTTP-only cookies
--   Nodemailer
+- bcrypt / argon2
+- JWT
+- HTTP-only cookies
+- Nodemailer
 
-------------------------------------------------------------------------
+---
 
 ## 6.2 User Module
 
@@ -277,13 +277,13 @@ Responsible for user management.
 
 Responsibilities:
 
--   Get user profile
--   Update profile
--   Change password
--   Manage user role
--   Account status
+- Get user profile
+- Update profile
+- Change password
+- Manage user role
+- Account status
 
-------------------------------------------------------------------------
+---
 
 ## 6.3 Survey Module
 
@@ -291,25 +291,25 @@ Responsible for survey lifecycle management.
 
 Responsibilities:
 
--   Create survey
--   Get survey
--   List surveys
--   Update survey
--   Delete survey
--   Publish survey
--   Close survey
--   Manage survey status
--   Generate public survey identifier/token
+- Create survey
+- Get survey
+- List surveys
+- Update survey
+- Delete survey
+- Publish survey
+- Close survey
+- Manage survey status
+- Generate public survey identifier/token
 
 Example statuses:
 
-``` text
+```text
 DRAFT
 ACTIVE
 CLOSED
 ```
 
-------------------------------------------------------------------------
+---
 
 ## 6.4 Question Module
 
@@ -317,16 +317,16 @@ Responsible for survey questions.
 
 Responsibilities:
 
--   Add question
--   Edit question
--   Delete question
--   Reorder questions
--   Configure required/optional questions
--   Configure question type
+- Add question
+- Edit question
+- Delete question
+- Reorder questions
+- Configure required/optional questions
+- Configure question type
 
 Possible question types:
 
-``` text
+```text
 TEXT
 LONG_TEXT
 SINGLE_CHOICE
@@ -338,7 +338,7 @@ DATE
 BOOLEAN
 ```
 
-------------------------------------------------------------------------
+---
 
 ## 6.5 Option Module
 
@@ -346,14 +346,14 @@ Responsible for selectable question options.
 
 Responsibilities:
 
--   Add option
--   Edit option
--   Delete option
--   Reorder options
+- Add option
+- Edit option
+- Delete option
+- Reorder options
 
 Example:
 
-``` text
+```text
 Question:
 "What is your favorite language?"
 
@@ -364,7 +364,7 @@ Options:
 - TypeScript
 ```
 
-------------------------------------------------------------------------
+---
 
 ## 6.6 Response Module
 
@@ -372,18 +372,18 @@ Responsible for collecting and managing survey responses.
 
 Responsibilities:
 
--   Open public survey
--   Validate submitted answers
--   Create response
--   Store answers
--   Prevent duplicate responses when configured
--   Support anonymous responses when configured
--   Retrieve responses
--   Retrieve response details
+- Open public survey
+- Validate submitted answers
+- Create response
+- Store answers
+- Prevent duplicate responses when configured
+- Support anonymous responses when configured
+- Retrieve responses
+- Retrieve response details
 
 A response is connected to a survey and contains multiple answers.
 
-``` text
+```text
 Survey
    │
    └── Response
@@ -393,7 +393,7 @@ Survey
           └── Answer
 ```
 
-------------------------------------------------------------------------
+---
 
 ## 6.7 Analytics Module
 
@@ -401,19 +401,19 @@ Responsible for calculating survey results.
 
 Responsibilities:
 
--   Total responses
--   Response rate
--   Question-level statistics
--   Choice distribution
--   Rating averages
--   Text response summaries
--   Charts
--   Filtering
--   Aggregations
+- Total responses
+- Response rate
+- Question-level statistics
+- Choice distribution
+- Rating averages
+- Text response summaries
+- Charts
+- Filtering
+- Aggregations
 
 Example:
 
-``` text
+```text
 Question: How satisfied are you?
 
 1 ★  = 10 responses
@@ -423,7 +423,7 @@ Question: How satisfied are you?
 5 ★  = 85 responses
 ```
 
-------------------------------------------------------------------------
+---
 
 ## 6.8 Export Module
 
@@ -431,13 +431,13 @@ Responsible for exporting survey data.
 
 Supported formats:
 
--   CSV
--   Excel
--   PDF
+- CSV
+- Excel
+- PDF
 
 Example exports:
 
-``` text
+```text
 Survey Results
 ├── Response ID
 ├── Submitted At
@@ -447,7 +447,7 @@ Survey Results
 └── ...
 ```
 
-------------------------------------------------------------------------
+---
 
 ## 6.9 Notification Module
 
@@ -455,17 +455,17 @@ Responsible for system notifications.
 
 Responsibilities:
 
--   Registration emails
--   Email verification
--   Password reset emails
--   Survey invitations
--   Response notifications
--   Survey status notifications
+- Registration emails
+- Email verification
+- Password reset emails
+- Survey invitations
+- Response notifications
+- Survey status notifications
 
 Uses an external email service through SMTP/Nodemailer or an email
 provider.
 
-------------------------------------------------------------------------
+---
 
 ## 6.10 Admin Module
 
@@ -473,14 +473,14 @@ Responsible for administrative functionality.
 
 Responsibilities:
 
--   Manage users
--   Manage surveys
--   Monitor platform activity
--   Review audit logs
--   View system statistics
--   Manage platform settings
+- Manage users
+- Manage surveys
+- Monitor platform activity
+- Review audit logs
+- View system statistics
+- Manage platform settings
 
-------------------------------------------------------------------------
+---
 
 # 7. REST API Layer
 
@@ -488,7 +488,7 @@ The backend exposes RESTful endpoints.
 
 Example API structure:
 
-``` text
+```text
 /api
 │
 ├── /auth
@@ -546,7 +546,7 @@ Example API structure:
     └── /audit-logs
 ```
 
-------------------------------------------------------------------------
+---
 
 # 8. Database Layer
 
@@ -558,7 +558,7 @@ Prisma is used as the ORM.
 
 Core entities:
 
-``` text
+```text
 User
 Survey
 Question
@@ -569,11 +569,11 @@ Token
 AuditLog
 ```
 
-------------------------------------------------------------------------
+---
 
 # 9. Database Entity Relationships
 
-``` text
+```text
 User
  │
  ├───────────────< Survey
@@ -600,13 +600,13 @@ User
  └───────────────< AuditLog
 ```
 
-------------------------------------------------------------------------
+---
 
 # 10. Main Database Tables
 
 ## Users
 
-``` text
+```text
 users
 ├── id
 ├── name
@@ -619,16 +619,16 @@ users
 
 Roles:
 
-``` text
+```text
 USER
 ADMIN
 ```
 
-------------------------------------------------------------------------
+---
 
 ## Surveys
 
-``` text
+```text
 surveys
 ├── id
 ├── userId
@@ -641,15 +641,15 @@ surveys
 
 Relationship:
 
-``` text
+```text
 User 1 ──────── N Surveys
 ```
 
-------------------------------------------------------------------------
+---
 
 ## Questions
 
-``` text
+```text
 questions
 ├── id
 ├── surveyId
@@ -663,15 +663,15 @@ questions
 
 Relationship:
 
-``` text
+```text
 Survey 1 ──────── N Questions
 ```
 
-------------------------------------------------------------------------
+---
 
 ## Options
 
-``` text
+```text
 options
 ├── id
 ├── questionId
@@ -683,15 +683,15 @@ options
 
 Relationship:
 
-``` text
+```text
 Question 1 ──────── N Options
 ```
 
-------------------------------------------------------------------------
+---
 
 ## Responses
 
-``` text
+```text
 responses
 ├── id
 ├── surveyId
@@ -705,12 +705,12 @@ The `userId` can be nullable to support anonymous responses.
 
 The system can support either:
 
--   Multiple responses per user
--   One response per user
+- Multiple responses per user
+- One response per user
 
 This should be controlled by a survey-level configuration such as:
 
-``` text
+```text
 allowMultipleResponses
 ```
 
@@ -718,11 +718,11 @@ If multiple submissions are disabled, the backend should enforce the
 rule with a database constraint and/or transactional application logic
 rather than relying only on frontend validation.
 
-------------------------------------------------------------------------
+---
 
 ## Answers
 
-``` text
+```text
 answers
 ├── id
 ├── responseId
@@ -734,7 +734,7 @@ answers
 
 An answer belongs to:
 
-``` text
+```text
 Response + Question
 ```
 
@@ -743,7 +743,7 @@ options.
 
 Examples:
 
-``` text
+```text
 Text Question
 → textAnswer
 
@@ -757,13 +757,13 @@ Rating
 → textAnswer or a dedicated numeric field
 ```
 
-------------------------------------------------------------------------
+---
 
 ## Tokens
 
 Used for public survey access.
 
-``` text
+```text
 tokens
 ├── id
 ├── token
@@ -775,17 +775,17 @@ tokens
 
 A token can be used to generate a public URL such as:
 
-``` text
+```text
 /survey/<token>
 ```
 
-------------------------------------------------------------------------
+---
 
 ## Audit Logs
 
 Used to track important platform actions.
 
-``` text
+```text
 audit_logs
 ├── id
 ├── userId
@@ -797,7 +797,7 @@ audit_logs
 
 Examples:
 
-``` text
+```text
 SURVEY_CREATED
 SURVEY_UPDATED
 SURVEY_DELETED
@@ -806,7 +806,7 @@ RESPONSE_SUBMITTED
 USER_UPDATED
 ```
 
-------------------------------------------------------------------------
+---
 
 # 11. External Services
 
@@ -814,80 +814,80 @@ USER_UPDATED
 
 Possible implementation:
 
--   Nodemailer
--   SMTP
--   SendGrid
--   Resend
--   Amazon SES
+- Nodemailer
+- SMTP
+- SendGrid
+- Resend
+- Amazon SES
 
 Used for:
 
--   Verification
--   Password reset
--   Invitations
--   Notifications
+- Verification
+- Password reset
+- Invitations
+- Notifications
 
-------------------------------------------------------------------------
+---
 
 ## File Storage
 
 Used for:
 
--   Export files
--   Survey assets
--   Uploaded images
--   Generated reports
+- Export files
+- Survey assets
+- Uploaded images
+- Generated reports
 
 Possible providers:
 
--   AWS S3
--   Cloudinary
--   DigitalOcean Spaces
+- AWS S3
+- Cloudinary
+- DigitalOcean Spaces
 
-------------------------------------------------------------------------
+---
 
 ## Analytics / Charts
 
 Frontend chart libraries:
 
--   Chart.js
--   Recharts
+- Chart.js
+- Recharts
 
 Backend provides aggregated data through the analytics API.
 
-------------------------------------------------------------------------
+---
 
 ## Background Jobs
 
 Background processing can be introduced for:
 
--   Sending bulk emails
--   Generating large exports
--   Processing reports
--   Scheduled tasks
--   Notifications
+- Sending bulk emails
+- Generating large exports
+- Processing reports
+- Scheduled tasks
+- Notifications
 
 Possible technologies:
 
--   Redis
--   BullMQ
+- Redis
+- BullMQ
 
-------------------------------------------------------------------------
+---
 
 # 12. Caching and Session Infrastructure
 
 Redis can optionally be used for:
 
--   Session storage
--   Rate limiting
--   API caching
--   Temporary tokens
--   Background job queues
--   Distributed locks
+- Session storage
+- Rate limiting
+- API caching
+- Temporary tokens
+- Background job queues
+- Distributed locks
 
 Example:
 
-``` text
+```text
 Node.js / Express
        │
        ├── PostgreSQL → Persistent application data
@@ -895,7 +895,7 @@ Node.js / Express
        └── Redis      → Cache / sessions / queues
 ```
 
-------------------------------------------------------------------------
+---
 
 # 13. Security Architecture
 
@@ -903,7 +903,7 @@ Security should be enforced at multiple layers.
 
 ## Authentication
 
-``` text
+```text
 User
  ↓
 Login
@@ -919,21 +919,21 @@ Authenticated API requests
 
 Recommended:
 
--   Password hashing with Argon2 or bcrypt
--   HTTP-only cookies
--   Secure cookies in production
--   SameSite protection
--   HTTPS
--   Token expiration
--   Refresh/session rotation where applicable
+- Password hashing with Argon2 or bcrypt
+- HTTP-only cookies
+- Secure cookies in production
+- SameSite protection
+- HTTPS
+- Token expiration
+- Refresh/session rotation where applicable
 
-------------------------------------------------------------------------
+---
 
 ## Authorization
 
 Use role-based access control.
 
-``` text
+```text
 USER
  ├── Create own surveys
  ├── Manage own surveys
@@ -951,13 +951,13 @@ Every protected backend endpoint should verify both:
 1.  Authentication
 2.  Authorization
 
-------------------------------------------------------------------------
+---
 
 ## Validation
 
 Use Zod or another validation library.
 
-``` text
+```text
 Request
    ↓
 Schema Validation
@@ -971,13 +971,13 @@ Database
 
 Never rely only on frontend validation.
 
-------------------------------------------------------------------------
+---
 
 # 14. Backend Request Flow
 
 Example: Creating a survey.
 
-``` text
+```text
 React Frontend
       │
       │ POST /api/surveys
@@ -1012,11 +1012,11 @@ Response
 React Frontend
 ```
 
-------------------------------------------------------------------------
+---
 
 # 15. Response Submission Flow
 
-``` text
+```text
 Respondent
     │
     ▼
@@ -1063,11 +1063,11 @@ Return Success
 The response and its answers should be created transactionally so that a
 partially saved response is avoided.
 
-------------------------------------------------------------------------
+---
 
 # 16. Analytics Flow
 
-``` text
+```text
 Survey Owner
      │
      ▼
@@ -1092,11 +1092,11 @@ React
 Charts / Tables / Statistics
 ```
 
-------------------------------------------------------------------------
+---
 
 # 17. Export Flow
 
-``` text
+```text
 User
  │
  ▼
@@ -1122,13 +1122,13 @@ Return File / Store in Object Storage
 For large exports, the export operation can be moved to a background job
 using Redis + BullMQ.
 
-------------------------------------------------------------------------
+---
 
 # 18. Infrastructure and Deployment
 
 Recommended production architecture:
 
-``` text
+```text
                          Internet
                             │
                             ▼
@@ -1155,13 +1155,13 @@ Recommended production architecture:
                     PostgreSQL      Redis      Object Storage
 ```
 
-------------------------------------------------------------------------
+---
 
 # 19. Deployment Components
 
 ## Frontend
 
-``` text
+```text
 React
    ↓
 Vite Build
@@ -1171,11 +1171,11 @@ Static Files
 Nginx / CDN
 ```
 
-------------------------------------------------------------------------
+---
 
 ## Backend
 
-``` text
+```text
 Node.js
    ↓
 Express.js
@@ -1183,39 +1183,39 @@ Express.js
 REST API
 ```
 
-------------------------------------------------------------------------
+---
 
 ## Database
 
-``` text
+```text
 PostgreSQL
    ↓
 Prisma ORM
 ```
 
-------------------------------------------------------------------------
+---
 
 ## Redis
 
 Used for:
 
--   Caching
--   Sessions
--   Rate limiting
--   Background jobs
+- Caching
+- Sessions
+- Rate limiting
+- Background jobs
 
-------------------------------------------------------------------------
+---
 
 ## Object Storage
 
 Used for:
 
--   Images
--   Generated reports
--   Exports
--   Other files
+- Images
+- Generated reports
+- Exports
+- Other files
 
-------------------------------------------------------------------------
+---
 
 # 20. Docker Architecture
 
@@ -1223,7 +1223,7 @@ The application can be containerized using Docker.
 
 Example:
 
-``` text
+```text
 docker-compose.yml
 │
 ├── frontend
@@ -1242,13 +1242,13 @@ docker-compose.yml
     └── BullMQ Worker
 ```
 
-------------------------------------------------------------------------
+---
 
 # 21. CI/CD Pipeline
 
 GitHub Actions can automate deployment.
 
-``` text
+```text
 Developer
     │
     ▼
@@ -1275,7 +1275,7 @@ Deploy
     └── Worker
 ```
 
-------------------------------------------------------------------------
+---
 
 # 22. Environment Configuration
 
@@ -1284,7 +1284,7 @@ configuration.
 
 Example:
 
-``` text
+```text
 NODE_ENV
 PORT
 
@@ -1311,7 +1311,7 @@ API_URL
 
 Never commit `.env` files containing secrets to Git.
 
-------------------------------------------------------------------------
+---
 
 # 23. Monitoring and Operations
 
@@ -1319,13 +1319,13 @@ Never commit `.env` files containing secrets to Git.
 
 Possible tools:
 
--   Winston
--   Pino
--   Morgan
+- Winston
+- Pino
+- Morgan
 
 Log important events such as:
 
-``` text
+```text
 HTTP requests
 Authentication failures
 Database errors
@@ -1334,33 +1334,33 @@ Background job failures
 Security events
 ```
 
-------------------------------------------------------------------------
+---
 
 ## Error Tracking
 
 Possible tool:
 
--   Sentry
+- Sentry
 
 Used for:
 
--   Frontend errors
--   Backend exceptions
--   API failures
--   Production debugging
+- Frontend errors
+- Backend exceptions
+- API failures
+- Production debugging
 
-------------------------------------------------------------------------
+---
 
 ## Performance Monitoring
 
 Possible tools:
 
--   Prometheus
--   Grafana
+- Prometheus
+- Grafana
 
 Metrics can include:
 
-``` text
+```text
 API response time
 Request count
 Error rate
@@ -1370,25 +1370,25 @@ Memory usage
 Queue size
 ```
 
-------------------------------------------------------------------------
+---
 
 ## Uptime Monitoring
 
 Possible tools:
 
--   UptimeRobot
--   Pingdom
+- UptimeRobot
+- Pingdom
 
 Monitor:
 
-``` text
+```text
 Frontend
 Backend API
 Database connectivity
 Critical endpoints
 ```
 
-------------------------------------------------------------------------
+---
 
 # 24. Backup and Recovery
 
@@ -1396,7 +1396,7 @@ PostgreSQL should be backed up regularly.
 
 Recommended strategy:
 
-``` text
+```text
 PostgreSQL
     │
     ▼
@@ -1408,42 +1408,42 @@ Secure Backup Storage
 
 Important considerations:
 
--   Automated daily backups
--   Backup retention
--   Off-site backup
--   Periodic restore testing
+- Automated daily backups
+- Backup retention
+- Off-site backup
+- Periodic restore testing
 
-------------------------------------------------------------------------
+---
 
 # 25. Key Application Features
 
 The architecture supports:
 
--   Multi-question surveys
--   Multiple question types
--   Required/optional questions
--   Conditional logic (future enhancement)
--   Survey templates
--   Public surveys
--   Private surveys
--   Response collection
--   Multiple-response configuration
--   Real-time or near-real-time analytics
--   CSV / Excel / PDF exports
--   Email notifications
--   Role-based access control
--   Audit logs
--   Activity tracking
--   Background jobs
--   File storage
--   Monitoring
--   Backup and recovery
+- Multi-question surveys
+- Multiple question types
+- Required/optional questions
+- Conditional logic (future enhancement)
+- Survey templates
+- Public surveys
+- Private surveys
+- Response collection
+- Multiple-response configuration
+- Real-time or near-real-time analytics
+- CSV / Excel / PDF exports
+- Email notifications
+- Role-based access control
+- Audit logs
+- Activity tracking
+- Background jobs
+- File storage
+- Monitoring
+- Backup and recovery
 
-------------------------------------------------------------------------
+---
 
 # 26. Recommended Project Structure
 
-``` text
+```text
 online-survey-builder/
 │
 ├── client/
@@ -1503,7 +1503,7 @@ online-survey-builder/
 └── README.md
 ```
 
-------------------------------------------------------------------------
+---
 
 # 27. Architectural Principles
 
@@ -1512,7 +1512,7 @@ online-survey-builder/
 Frontend, API, business logic, database access, and infrastructure
 should remain separated.
 
-``` text
+```text
 Controller
    ↓
 Service
@@ -1522,14 +1522,14 @@ Repository / Prisma
 Database
 ```
 
-------------------------------------------------------------------------
+---
 
 ## API-First Design
 
 The frontend should communicate with the backend through documented REST
 APIs rather than accessing the database directly.
 
-``` text
+```text
 React
   ↓
 REST API
@@ -1543,13 +1543,13 @@ Prisma
 PostgreSQL
 ```
 
-------------------------------------------------------------------------
+---
 
 ## Transactional Response Submission
 
 Response creation should use a database transaction:
 
-``` text
+```text
 BEGIN
   Create Response
   Create Answer 1
@@ -1560,17 +1560,17 @@ COMMIT
 
 If any operation fails:
 
-``` text
+```text
 ROLLBACK
 ```
 
 This keeps survey responses consistent.
 
-------------------------------------------------------------------------
+---
 
 # 28. Complete Data Flow
 
-``` text
+```text
                     ┌──────────────┐
                     │    USER      │
                     └──────┬───────┘
@@ -1606,36 +1606,36 @@ This keeps survey responses consistent.
     └───────────┘      └───────────┘
 ```
 
-------------------------------------------------------------------------
+---
 
 # 29. Future Enhancements
 
 The architecture can later support:
 
--   Survey templates
--   Survey duplication
--   Conditional question logic
--   Scheduled survey closing
--   Email invitations
--   Advanced respondent segmentation
--   Real-time analytics
--   Collaborative survey editing
--   Custom themes
--   White-label surveys
--   Public API
--   Webhooks
--   Multi-language surveys
--   Advanced permissions
--   Subscription/billing system
--   Horizontal backend scaling
+- Survey templates
+- Survey duplication
+- Conditional question logic
+- Scheduled survey closing
+- Email invitations
+- Advanced respondent segmentation
+- Real-time analytics
+- Collaborative survey editing
+- Custom themes
+- White-label surveys
+- Public API
+- Webhooks
+- Multi-language surveys
+- Advanced permissions
+- Subscription/billing system
+- Horizontal backend scaling
 
-------------------------------------------------------------------------
+---
 
 # 30. Final Architecture Summary
 
 The Online Survey Builder follows a layered full-stack architecture:
 
-``` text
+```text
 ┌─────────────────────────────────────────────┐
 │                 USERS                       │
 │ Owners / Respondents / Admin                │

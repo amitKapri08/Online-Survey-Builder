@@ -37,15 +37,16 @@ apiClient.interceptors.response.use(
 
     const errorCode = error.response?.data?.code;
 
+    const url = originalRequest.url ?? "";
+
+    const isAuthMutation =
+      url !== "/auth/refresh" && /^\/auth\//.test(url);
+
     if (
       error.response?.status !== 401 ||
       errorCode !== "ACCESS_TOKEN_EXPIRED" ||
       originalRequest._retry ||
-      originalRequest.url === "/auth/refresh" ||
-      originalRequest.url === "/auth/csrf" ||
-      originalRequest.url === "/auth/login" ||
-      originalRequest.url === "/auth/register" ||
-      originalRequest.url === "/auth/logout"
+      isAuthMutation
     ) {
       return Promise.reject(error);
     }

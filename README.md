@@ -16,6 +16,7 @@ A real-world full-stack application that lets users **create surveys, collect re
 ## Tech Stack
 
 ### Client (`client/`)
+
 - **React 19** + **TypeScript** + **Vite**
 - **Tailwind CSS 4**
 - **React Router 7** for routing
@@ -23,6 +24,7 @@ A real-world full-stack application that lets users **create surveys, collect re
 - **React Hook Form** + **Zod** for form handling and validation
 
 ### Server (`server/`)
+
 - **Node.js** + **Express 5** (TypeScript)
 - **Prisma 7** with PostgreSQL and the **pg driver adapter** (`@prisma/adapter-pg`)
 - **JWT** + `bcrypt` for authentication
@@ -97,25 +99,25 @@ The client runs at `http://localhost:5173` (Vite default) and the server at `htt
 
 Core models in `server/prisma/schema.prisma`:
 
-| Model | Purpose |
-|-------|---------|
-| `User` | Registered users, owners of surveys |
-| `Survey` | A survey, its slug, status, and configuration |
-| `Question` | A question within a survey, with type and ordering |
+| Model            | Purpose                                               |
+| ---------------- | ----------------------------------------------------- |
+| `User`           | Registered users, owners of surveys                   |
+| `Survey`         | A survey, its slug, status, and configuration         |
+| `Question`       | A question within a survey, with type and ordering    |
 | `QuestionOption` | Choice options for single/multiple/dropdown questions |
-| `Response` | An individual submission to a survey |
-| `Answer` | The answer to a specific question within a response |
+| `Response`       | An individual submission to a survey                  |
+| `Answer`         | The answer to a specific question within a response   |
 
 ## Scripts
 
 ### Client (`client/`)
 
-| Script | Description |
-|--------|-------------|
-| `npm run dev` | Start the Vite dev server |
-| `npm run build` | Type-check and build for production |
-| `npm run lint` | Run ESLint |
-| `npm run preview` | Preview the production build |
+| Script            | Description                         |
+| ----------------- | ----------------------------------- |
+| `npm run dev`     | Start the Vite dev server           |
+| `npm run build`   | Type-check and build for production |
+| `npm run lint`    | Run ESLint                          |
+| `npm run preview` | Preview the production build        |
 
 ### Server (`server/`)
 

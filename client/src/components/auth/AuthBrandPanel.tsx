@@ -89,8 +89,7 @@ export function AuthBrandPanel({ variant }: AuthBrandPanelProps) {
             <>
               Build surveys
               <br />
-              people love{" "}
-              <span className="text-success-600">to answer.</span>
+              people love <span className="text-success-600">to answer.</span>
             </>
           )}
         </h2>
@@ -123,9 +122,7 @@ export function AuthBrandPanel({ variant }: AuthBrandPanelProps) {
                 >
                   <Icon
                     className={
-                      isLogin
-                        ? "size-4 text-white"
-                        : "size-4 text-success-600"
+                      isLogin ? "size-4 text-white" : "size-4 text-success-600"
                     }
                   />
                 </div>
