@@ -34,7 +34,7 @@ export function AuthInput({
         <Input
           id={id}
           aria-invalid={error ? true : undefined}
-          className={cn("h-11", icon ? "pl-10 pr-3" : "px-3")}
+          className={cn("h-11 rounded-xl border-border bg-background/50", icon ? "pl-10 pr-3" : "px-3")}
           {...props}
         />
       </div>

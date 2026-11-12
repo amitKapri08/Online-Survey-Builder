@@ -9,9 +9,9 @@ const buttonVariants = cva(
         outline:
           "border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
         brand:
-          "bg-brand-600 text-white hover:bg-brand-700 focus-visible:border-brand-600 focus-visible:ring-brand-500/40 dark:bg-brand-700 dark:hover:bg-brand-600",
+          "bg-brand-600 text-white hover:bg-brand-700 focus-visible:border-brand-600 focus-visible:ring-brand-500/40 dark:bg-brand-600 dark:hover:bg-brand-700 dark:text-white",
         success:
-          "bg-success-600 text-white hover:bg-success-700 focus-visible:border-success-600 focus-visible:ring-success-500/40 dark:bg-success-700 dark:hover:bg-success-600",
+          "bg-success-600 text-white hover:bg-success-700 focus-visible:border-success-600 focus-visible:ring-success-500/40 dark:bg-success-600 dark:hover:bg-success-700 dark:text-white",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)] aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
         ghost:

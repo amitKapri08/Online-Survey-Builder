@@ -28,4 +28,33 @@ export interface AdminStats {
   totalUsers: number;
   totalSurveys: number;
   totalResponses: number;
+  totalViews: number;
+  totalQuestions: number;
+  surveysByStatus: {
+    draft: number;
+    published: number;
+    closed: number;
+  };
+}
+
+export interface AdminAuditLogEntry {
+  id: string;
+  actorId: string;
+  action: string;
+  targetId: string | null;
+  details: Record<string, unknown> | null;
+  createdAt: string;
+  actor: {
+    id: string;
+    name: string;
+    email: string;
+  };
+}
+
+export interface AdminAuditLogsResponse {
+  logs: AdminAuditLogEntry[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 }

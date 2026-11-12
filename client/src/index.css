@@ -234,30 +234,30 @@
   --sidebar-ring: oklch(0.556 0 0);
 
   /* Brand (primary / login) */
-  --brand-50: oklch(0.282 0.091 267.935);
-  --brand-100: oklch(0.379 0.146 265.522);
-  --brand-300: oklch(0.546 0.245 262.881);
-  --brand-400: oklch(0.623 0.214 259.815);
-  --brand-500: oklch(0.707 0.165 254.624);
-  --brand-600: oklch(0.809 0.105 251.813);
-  --brand-700: oklch(0.882 0.059 254.128);
-  --brand-800: oklch(0.932 0.032 255.585);
+  --brand-50: oklch(0.20 0.04 265);
+  --brand-100: oklch(0.28 0.06 264);
+  --brand-300: oklch(0.70 0.14 255);
+  --brand-400: oklch(0.62 0.19 258);
+  --brand-500: oklch(0.54 0.22 260);
+  --brand-600: oklch(0.46 0.21 262);
+  --brand-700: oklch(0.40 0.20 264);
+  --brand-800: oklch(0.33 0.17 265);
 
   /* Success (secondary / register) */
-  --success-50: oklch(0.262 0.051 172.552);
-  --success-100: oklch(0.378 0.077 168.94);
-  --success-400: oklch(0.696 0.17 162.48);
-  --success-500: oklch(0.765 0.177 163.223);
-  --success-600: oklch(0.845 0.143 164.978);
-  --success-700: oklch(0.905 0.093 164.15);
+  --success-50: oklch(0.20 0.04 165);
+  --success-100: oklch(0.27 0.06 165);
+  --success-400: oklch(0.64 0.15 163);
+  --success-500: oklch(0.56 0.16 162);
+  --success-600: oklch(0.46 0.14 163);
+  --success-700: oklch(0.40 0.12 164);
 
   /* Danger (errors) */
-  --danger-50: oklch(0.401 0.123 21.777);
-  --danger-100: oklch(0.505 0.213 27.518);
-  --danger-200: oklch(0.577 0.245 27.325);
-  --danger-500: oklch(0.704 0.191 22.216);
-  --danger-600: oklch(0.808 0.114 19.571);
-  --danger-700: oklch(0.885 0.062 18.334);
+  --danger-50: oklch(0.22 0.04 25);
+  --danger-100: oklch(0.29 0.08 26);
+  --danger-200: oklch(0.38 0.12 27);
+  --danger-500: oklch(0.56 0.20 26);
+  --danger-600: oklch(0.47 0.20 27);
+  --danger-700: oklch(0.40 0.18 27);
 }
 
 @layer base {

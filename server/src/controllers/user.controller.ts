@@ -3,7 +3,11 @@ import type { Request, Response, NextFunction } from "express";
 import {
   changePassword as changePasswordService,
 } from "../services/auth.service.js";
-import { getUserById, updateProfile as updateProfileService } from "../services/user.service.js";
+import {
+  getUserById,
+  getUserDashboardData,
+  updateProfile as updateProfileService,
+} from "../services/user.service.js";
 import { AppError } from "../utils/AppError.js";
 import {
   setAuthCookie,
@@ -87,6 +91,27 @@ export const changePassword = async (
       data: {
         user,
       },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getDashboardSummary = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      throw new AppError("Authentication required", 401);
+    }
+
+    const data = await getUserDashboardData(req.user.id);
+
+    res.status(200).json({
+      success: true,
+      data,
     });
   } catch (error) {
     next(error);

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { AxiosError } from "axios";
-import { CheckCircle2, ClipboardList, PencilRuler } from "lucide-react";
+import { CheckCircle2, ClipboardList, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 import { SurveyAnswerForm } from "@/components/public/SurveyAnswerForm";
@@ -9,14 +9,22 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Loader } from "@/components/ui/loader";
+import { ThemeToggle } from "@/components/theme";
+import { useAuth } from "@/context/useAuth";
 import { usePublicSurvey, useSubmitResponse } from "@/hooks/useSurveyApi";
 import { recordSurveyView } from "@/services/survey.service";
+import { ROUTES } from "@/lib/routes";
 import { getApiErrorMessage } from "@/lib/apiError";
 import type { SubmitResponsePayload } from "@/types/survey";
 
 function SurveyPublicPage() {
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+
   const [submitted, setSubmitted] = useState(false);
+  const [countdown, setCountdown] = useState(5);
+  const [redirectCancelled, setRedirectCancelled] = useState(false);
 
   const surveyQuery = usePublicSurvey(slug ?? "");
   const submitMutation = useSubmitResponse();
@@ -27,6 +35,25 @@ function SurveyPublicPage() {
     if (!survey?.id) return;
     void recordSurveyView(survey.id);
   }, [survey?.id]);
+
+  useEffect(() => {
+    if (!submitted || redirectCancelled) return;
+
+    if (countdown <= 0) {
+      if (isAuthenticated) {
+        navigate(ROUTES.DASHBOARD);
+      } else {
+        navigate(ROUTES.HOME);
+      }
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setCountdown((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [submitted, redirectCancelled, countdown, isAuthenticated, navigate]);
 
   const handleSubmit = async (payload: SubmitResponsePayload) => {
     if (!survey) return;
@@ -52,97 +79,175 @@ function SurveyPublicPage() {
 
   const handleSubmitAnother = () => {
     setSubmitted(false);
+    setCountdown(5);
+    setRedirectCancelled(false);
     submitMutation.reset();
   };
 
   if (surveyQuery.isLoading) {
     return (
-      <div className="flex min-h-screen flex-col bg-muted">
-        <div className="flex flex-1 items-center justify-center py-12">
-          <Loader label="Loading survey..." />
-        </div>
+      <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-slate-100 via-slate-50 to-slate-200 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 p-4">
+        <Loader label="Loading survey experience..." />
       </div>
     );
   }
 
   if (surveyQuery.isError || !survey) {
     return (
-      <div className="flex min-h-screen flex-col bg-muted">
-        <div className="flex flex-1 items-center justify-center py-12">
-          <Card className="max-w-md">
-            <CardContent className="pt-6">
-              <EmptyState
-                icon={ClipboardList}
-                title="Survey not available"
-                description="This survey could not be found, or it is not currently open for responses."
-              />
-            </CardContent>
-          </Card>
-        </div>
+      <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-slate-100 via-slate-50 to-slate-200 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 p-4">
+        <Card className="w-full max-w-md rounded-3xl border border-border/80 shadow-xl">
+          <CardContent className="pt-6">
+            <EmptyState
+              icon={ClipboardList}
+              title="Survey not available"
+              description="This survey could not be found, or it is not currently open for responses."
+            />
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
+  // Celebratory Thank You Screen
   if (submitted) {
     return (
-      <div className="flex min-h-screen flex-col bg-muted">
-        <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center gap-4 px-4 py-12 text-center">
-          <CheckCircle2 className="size-12 text-success" />
-          <h1 className="text-xl font-bold text-foreground sm:text-2xl">
-            Thank you! Your response has been recorded.
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {survey.allowMultipleResponses
-              ? "Please close this page, or submit another response."
-              : "Please close this page. Thank you for taking part."}
-          </p>
-          {survey.allowMultipleResponses && (
-            <Button variant="outline" onClick={handleSubmitAnother}>
-              Submit another response
-            </Button>
+      <div className="relative flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-slate-100 via-slate-50 to-slate-200 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 p-4">
+        <div className="absolute top-4 right-4">
+          <ThemeToggle />
+        </div>
+
+        <div className="mx-auto flex w-full max-w-md flex-col items-center justify-center gap-6 rounded-3xl border border-border/80 bg-card p-8 sm:p-10 text-center shadow-xl ring-1 ring-black/[0.04] dark:ring-white/[0.06]">
+          <div className="flex size-16 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400 ring-2 ring-emerald-500/20">
+            <CheckCircle2 className="size-8" />
+          </div>
+
+          <div className="space-y-2">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+              Thank you!
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Your response has been recorded successfully.
+            </p>
+          </div>
+
+          {!redirectCancelled && countdown > 0 ? (
+            <div className="w-full rounded-2xl border border-border/80 bg-muted/30 p-4">
+              <p className="text-xs text-muted-foreground">
+                Redirecting to{" "}
+                <span className="font-semibold text-foreground">
+                  {isAuthenticated ? "your dashboard" : "the homepage"}
+                </span>{" "}
+                in {countdown}s...
+              </p>
+              <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full bg-brand-600 transition-all duration-1000 ease-linear"
+                  style={{ width: `${(countdown / 5) * 100}%` }}
+                />
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setRedirectCancelled(true)}
+                className="mt-2.5 text-xs text-muted-foreground hover:text-foreground"
+              >
+                Cancel auto-redirect
+              </Button>
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              Auto-redirect cancelled.
+            </p>
           )}
+
+          <div className="flex w-full flex-col gap-2.5 pt-1">
+            {isAuthenticated ? (
+              <Button
+                variant="brand"
+                onClick={() => navigate(ROUTES.DASHBOARD)}
+                className="w-full shadow-xs"
+              >
+                Go to Dashboard
+              </Button>
+            ) : (
+              <>
+                <Button
+                  variant="brand"
+                  onClick={() => navigate(ROUTES.HOME)}
+                  className="w-full shadow-xs"
+                >
+                  Go to Homepage
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => navigate(ROUTES.REGISTER)}
+                  className="w-full shadow-2xs"
+                >
+                  Create your own survey free
+                </Button>
+              </>
+            )}
+
+            {survey.allowMultipleResponses && (
+              <Button
+                variant="ghost"
+                onClick={handleSubmitAnother}
+                className="w-full text-xs text-muted-foreground"
+              >
+                Submit another response
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-muted">
-      <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8 sm:py-12">
-        <Card>
-          <CardContent className="pt-6">
-            <header className="mb-6">
-              <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-                {survey.title}
-              </h1>
-              {survey.description && (
-                <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">
-                  {survey.description}
-                </p>
-              )}
-              <p className="mt-3 text-xs text-muted-foreground">
-                {survey.isAnonymous
-                  ? "This survey is anonymous."
-                  : "This survey collects your identity."}
-              </p>
-            </header>
+    <div className="relative flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-slate-100 via-slate-50 to-slate-200 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 px-4 py-12 sm:py-16">
+      {/* Theme Toggle Top Right */}
+      <div className="absolute top-4 right-4 z-20">
+        <ThemeToggle />
+      </div>
 
-            {survey.questions.length === 0 ? (
+      <main className="mx-auto flex w-full max-w-xl flex-col items-center">
+        {/* Survey Branding & Title Header */}
+        <header className="mb-6 w-full text-center space-y-2">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-background/80 px-3 py-0.5 text-xs font-medium text-muted-foreground shadow-2xs backdrop-blur-sm">
+            <Sparkles className="size-3 text-brand-600" />
+            <span>SurveyBuilder</span>
+          </div>
+
+          <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
+            {survey.title}
+          </h1>
+
+          {survey.description && (
+            <p className="mx-auto max-w-md text-sm text-muted-foreground">
+              {survey.description}
+            </p>
+          )}
+        </header>
+
+        {/* Survey Questions Form */}
+        {survey.questions.length === 0 ? (
+          <Card className="w-full rounded-3xl border border-border/80 shadow-xl">
+            <CardContent className="pt-6">
               <EmptyState
-                icon={PencilRuler}
+                icon={ClipboardList}
                 title="No questions yet"
                 description="This survey doesn't have any questions yet. Please check back later."
               />
-            ) : (
-              <SurveyAnswerForm
-                questions={survey.questions}
-                isAnonymous={survey.isAnonymous}
-                isSubmitting={submitMutation.isPending}
-                onSubmit={handleSubmit}
-              />
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        ) : (
+          <SurveyAnswerForm
+            questions={survey.questions}
+            isAnonymous={survey.isAnonymous}
+            isSubmitting={submitMutation.isPending}
+            onSubmit={handleSubmit}
+          />
+        )}
       </main>
     </div>
   );

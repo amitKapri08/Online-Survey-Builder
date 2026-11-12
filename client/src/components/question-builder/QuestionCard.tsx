@@ -67,127 +67,149 @@ function QuestionCard({
   dragHandleProps,
   isDragging,
 }: QuestionCardProps) {
+  const formattedIndex = String(index + 1).padStart(2, "0");
+
   return (
     <Card
       className={cn(
+        "relative rounded-xl border border-border/80 bg-card shadow-xs transition-all duration-200",
         "data-pending:opacity-60",
-        isDragging && "relative z-10 opacity-70 shadow-lg ring-2 ring-foreground",
+        isDragging && "z-20 opacity-90 shadow-xl ring-2 ring-brand-500",
+        !isEditing && "hover:border-border hover:shadow-sm",
       )}
       data-pending={isPending || undefined}
     >
-      <CardHeader className="flex-row items-start justify-between gap-2 space-y-0">
-        <div className="flex items-start gap-3">
+      <CardHeader className="flex-row items-start justify-between gap-3 space-y-0 p-4 sm:p-5">
+        <div className="flex items-start gap-3 min-w-0 flex-1">
+          {/* Drag Handle Grip */}
           {dragHandleProps && (
             <button
               type="button"
               {...dragHandleProps}
-              className="mt-0.5 cursor-grab touch-none rounded p-0.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground aria-pressed:cursor-grabbing"
+              className="mt-1 cursor-grab touch-none rounded p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground active:cursor-grabbing"
               aria-label="Drag to reorder question"
             >
               <GripVertical className="size-4" />
             </button>
           )}
-          <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground">
-            {index + 1}
-          </span>
-          <div className="space-y-1">
+
+          {/* Number Pill Badge matching mockup */}
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-brand-600 text-xs font-bold text-white shadow-2xs">
+            {formattedIndex}
+          </div>
+
+          {/* Title & Type Badge */}
+          <div className="min-w-0 flex-1 space-y-1">
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 onClick={onStartEdit}
                 disabled={!isEditable || isPending}
                 className={cn(
-                  "max-w-full truncate text-left text-sm font-medium text-foreground",
+                  "truncate text-left text-sm font-semibold text-foreground transition-colors",
                   isEditable && !isPending
-                    ? "cursor-pointer rounded px-0.5 hover:bg-muted hover:underline"
+                    ? "cursor-pointer hover:text-brand-600 dark:hover:text-brand-400"
                     : "cursor-default",
                 )}
                 title={isEditable ? "Click to edit question" : undefined}
               >
                 {question.questionText}
               </button>
+
               {question.isRequired && (
                 <span
-                  className="text-sm text-destructive"
-                  aria-label="Required question"
+                  className="inline-flex items-center rounded bg-rose-50 px-1.5 py-0.5 text-[11px] font-semibold text-rose-600 dark:bg-rose-950/50 dark:text-rose-400"
+                  title="Required question"
                 >
-                  *
+                  Required
                 </span>
               )}
-              <Badge variant="outline">{typeLabel(question.questionType)}</Badge>
+
+              <Badge variant="outline" className="text-[11px] font-normal">
+                {typeLabel(question.questionType)}
+              </Badge>
             </div>
           </div>
         </div>
+
+        {/* Action Toolbar */}
         {!isEditing && !isDragging && isEditable && (
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 shrink-0">
             {onQuickToggleRequired && (
               <Button
                 variant="ghost"
-                size="icon-sm"
+                size="icon-xs"
                 onClick={onQuickToggleRequired}
                 className={cn(
+                  "rounded-lg",
                   question.isRequired
-                    ? "text-destructive"
-                    : "text-muted-foreground",
+                    ? "text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                    : "text-muted-foreground hover:text-foreground",
                 )}
                 aria-pressed={question.isRequired}
-                aria-label={
-                  question.isRequired
-                    ? "Question is required — click to make optional"
-                    : "Question is optional — click to make required"
-                }
-                title={question.isRequired ? "Required" : "Optional"}
+                title={question.isRequired ? "Required (click to make optional)" : "Optional (click to make required)"}
               >
-                <Asterisk />
+                <Asterisk className="size-3.5" />
               </Button>
             )}
+
             <Button
-              variant="outline"
-              size="icon-sm"
+              variant="ghost"
+              size="icon-xs"
               onClick={onMoveUp}
               disabled={index === 0}
               aria-label="Move question up"
+              className="rounded-lg text-muted-foreground hover:text-foreground disabled:opacity-30"
             >
-              <ArrowUp />
+              <ArrowUp className="size-3.5" />
             </Button>
+
             <Button
-              variant="outline"
-              size="icon-sm"
+              variant="ghost"
+              size="icon-xs"
               onClick={onMoveDown}
               disabled={index === total - 1}
               aria-label="Move question down"
+              className="rounded-lg text-muted-foreground hover:text-foreground disabled:opacity-30"
             >
-              <ArrowDown />
+              <ArrowDown className="size-3.5" />
             </Button>
+
             <Button
-              variant="outline"
-              size="icon-sm"
+              variant="ghost"
+              size="icon-xs"
               onClick={onStartEdit}
               aria-label="Edit question"
+              className="rounded-lg text-muted-foreground hover:text-foreground"
             >
-              <Pencil />
+              <Pencil className="size-3.5" />
             </Button>
+
             <Button
-              variant="outline"
-              size="icon-sm"
+              variant="ghost"
+              size="icon-xs"
               onClick={onDuplicate}
               disabled={isPending}
               aria-label="Duplicate question"
+              className="rounded-lg text-muted-foreground hover:text-foreground"
             >
-              <Copy />
+              <Copy className="size-3.5" />
             </Button>
+
             <Button
-              variant="outline"
-              size="icon-sm"
+              variant="ghost"
+              size="icon-xs"
               onClick={onDelete}
               aria-label="Delete question"
+              className="rounded-lg text-muted-foreground hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40"
             >
-              <Trash2 />
+              <Trash2 className="size-3.5" />
             </Button>
           </div>
         )}
       </CardHeader>
-      <CardContent>
+
+      <CardContent className="p-4 sm:p-5 pt-0 sm:pt-0">
         {isEditing ? (
           <QuestionEditor
             initialValues={{
@@ -206,7 +228,7 @@ function QuestionCard({
             onSubmit={onSave}
           />
         ) : (
-          <div className="ml-9 mt-2">
+          <div className="ml-11 mt-1">
             <QuestionPreview question={question} />
           </div>
         )}

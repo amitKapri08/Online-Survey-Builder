@@ -12,8 +12,7 @@ export function SocialAuthButtons({
       <Button
         type="button"
         variant="outline"
-        size="xl"
-        className="w-full"
+        className="h-11 rounded-xl border-border bg-card font-medium text-foreground transition-all hover:bg-accent hover:border-slate-300 dark:hover:border-slate-700 shadow-xs"
         disabled={disabled}
       >
         <GoogleIcon data-icon="inline-start" />
@@ -23,8 +22,7 @@ export function SocialAuthButtons({
       <Button
         type="button"
         variant="outline"
-        size="xl"
-        className="w-full"
+        className="h-11 rounded-xl border-border bg-card font-medium text-foreground transition-all hover:bg-accent hover:border-slate-300 dark:hover:border-slate-700 shadow-xs"
         disabled={disabled}
       >
         <GitHubIcon data-icon="inline-start" />

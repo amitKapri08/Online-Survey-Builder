@@ -11,7 +11,7 @@ export default function RegisterPage() {
           </h1>
 
           <p className="text-sm text-muted-foreground">
-            Join SurveyHub and get started today!
+            Join SurveyBuilder and get started today!
           </p>
         </div>
 

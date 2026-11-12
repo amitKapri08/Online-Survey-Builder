@@ -41,5 +41,5 @@
     "ignoreDeprecations": "6.0"
   },
   "include": ["src"],
-  "exclude": ["prisma.config.ts"]
+  "exclude": ["prisma.config.ts", "src/__tests__"]
 }

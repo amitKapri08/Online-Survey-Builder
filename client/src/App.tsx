@@ -11,6 +11,7 @@ import {
 } from "@/components/protected";
 import { Loader } from "@/components/ui/loader";
 import { Toaster } from "@/components/ui/sonner";
+import { useAuth } from "@/context/useAuth";
 import { ROUTES } from "@/lib/routes";
 
 const LoginPage = lazy(() => import("@/pages/auth/LoginPage"));
@@ -19,12 +20,25 @@ const DashboardPage = lazy(() => import("@/pages/dashboard/DashboardPage"));
 const SurveyListPage = lazy(() => import("@/pages/surveys/SurveyListPage"));
 const CreateSurveyPage = lazy(() => import("@/pages/surveys/CreateSurveyPage"));
 const EditSurveyPage = lazy(() => import("@/pages/surveys/EditSurveyPage"));
+const TemplatesPage = lazy(() => import("@/pages/templates/TemplatesPage"));
 const SurveyPublicPage = lazy(() => import("@/pages/public/SurveyPublicPage"));
 const AdminPage = lazy(() => import("@/pages/admin/AdminPage"));
 const ProfilePage = lazy(() => import("@/pages/account/ProfilePage"));
 const NotFoundPage = lazy(() => import("@/pages/NotFoundPage"));
 const PrivacyPolicyPage = lazy(() => import("@/pages/legal/PrivacyPolicyPage"));
 const TermsOfUsePage = lazy(() => import("@/pages/legal/TermsOfUsePage"));
+const LandingPage = lazy(() => import("@/pages/landing/LandingPage"));
+
+function HomeRoute() {
+  const { isAuthenticated, isLoading } = useAuth();
+  if (isLoading) {
+    return <Loader variant="fullscreen" />;
+  }
+  if (isAuthenticated) {
+    return <Navigate to={ROUTES.DASHBOARD} replace />;
+  }
+  return <LandingPage />;
+}
 
 function App() {
   return (
@@ -32,16 +46,14 @@ function App() {
       <ErrorBoundary>
         <Suspense fallback={<Loader variant="fullscreen" />}>
           <Routes>
+            <Route path={ROUTES.HOME} element={<HomeRoute />} />
+
             <Route element={<PublicOnlyRoute />}>
               <Route path={ROUTES.LOGIN} element={<LoginPage />} />
               <Route path={ROUTES.REGISTER} element={<RegisterPage />} />
             </Route>
 
             <Route element={<ProtectedRoute />}>
-              <Route
-                path={ROUTES.HOME}
-                element={<Navigate to={ROUTES.DASHBOARD} replace />}
-              />
               <Route path={ROUTES.SURVEY_EDIT} element={<EditSurveyPage />} />
 
               <Route element={<DashboardLayout />}>
@@ -51,9 +63,11 @@ function App() {
                   path={ROUTES.SURVEY_CREATE}
                   element={<CreateSurveyPage />}
                 />
+                <Route path={ROUTES.TEMPLATES} element={<TemplatesPage />} />
                 <Route path={ROUTES.PROFILE} element={<ProfilePage />} />
                 <Route element={<AdminRoute />}>
                   <Route path={ROUTES.ADMIN} element={<AdminPage />} />
+                  <Route path="/admin/:tab" element={<AdminPage />} />
                 </Route>
               </Route>
             </Route>

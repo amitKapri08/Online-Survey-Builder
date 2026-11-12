@@ -4,6 +4,7 @@ import {
   handleListUsers,
   handleListSurveys,
   handleGetStats,
+  handleGetAuditLogs,
   handleUpdateUserRole,
   handleDeleteUser,
 } from "../controllers/admin.controller.js";
@@ -19,6 +20,7 @@ router.use(authenticate, requireAdmin);
 router.get("/users", handleListUsers);
 router.get("/surveys", handleListSurveys);
 router.get("/stats", handleGetStats);
+router.get("/audit-logs", handleGetAuditLogs);
 router.patch("/users/:id/role", originCheck, csrf, handleUpdateUserRole);
 router.delete("/users/:id", originCheck, csrf, handleDeleteUser);
 

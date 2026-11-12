@@ -22,6 +22,7 @@ export function LoginForm() {
   const loginMutation = useLogin();
 
   const [serverError, setServerError] = useState<string | null>(null);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const {
     register,
@@ -66,7 +67,7 @@ export function LoginForm() {
       {serverError && (
         <div
           role="alert"
-          className="rounded-lg border border-danger-200 bg-danger-50 px-4 py-3 text-sm text-danger-700"
+          className="rounded-xl border border-danger-200 bg-danger-50 px-4 py-3 text-sm text-danger-700 dark:border-danger-900/50 dark:bg-danger-950/40 dark:text-danger-400"
         >
           {serverError}
         </div>
@@ -76,7 +77,7 @@ export function LoginForm() {
         id="login-email"
         label="Email address"
         type="email"
-        placeholder="Enter your email"
+        placeholder="name@example.com"
         autoComplete="email"
         icon={<Mail className="size-4" />}
         error={errors.email?.message}
@@ -94,11 +95,25 @@ export function LoginForm() {
         {...register("password")}
       />
 
-      <div className="flex justify-end">
+      <div className="flex items-center justify-between">
+        <label
+          htmlFor="login-remember"
+          className="flex cursor-pointer items-center gap-2 text-xs font-medium text-muted-foreground select-none hover:text-foreground"
+        >
+          <input
+            id="login-remember"
+            type="checkbox"
+            checked={rememberMe}
+            onChange={(e) => setRememberMe(e.target.checked)}
+            className="size-4 rounded border-border text-brand-600 focus:ring-brand-500 focus:ring-offset-background"
+          />
+          Remember me
+        </label>
+
         <Button
           type="button"
           variant="link"
-          className="h-auto px-0 text-sm font-medium"
+          className="h-auto p-0 text-xs font-semibold text-brand-600 hover:text-brand-700"
         >
           Forgot password?
         </Button>
@@ -107,11 +122,10 @@ export function LoginForm() {
       <Button
         type="submit"
         variant="brand"
-        size="xl"
-        className="w-full font-semibold"
+        className="w-full h-11 rounded-xl font-semibold shadow-md shadow-brand-500/20"
         disabled={isSubmitting}
       >
-        {isSubmitting ? "Signing in..." : "Login"}
+        {isSubmitting ? "Signing in..." : "Sign in to Dashboard"}
       </Button>
 
       <AuthDivider />
@@ -122,7 +136,7 @@ export function LoginForm() {
         Don&apos;t have an account?{" "}
         <Link
           to={ROUTES.REGISTER}
-          className="font-semibold text-brand-600 hover:text-brand-700"
+          className="font-semibold text-brand-600 hover:text-brand-700 hover:underline"
         >
           Sign up
         </Link>

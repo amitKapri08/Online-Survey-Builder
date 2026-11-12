@@ -1,6 +1,11 @@
 import apiClient from "@/api/axios";
 import type { ApiResponse } from "@/types/api";
-import type { AdminStats, AdminSurvey, AdminUser } from "@/types/admin";
+import type {
+  AdminAuditLogsResponse,
+  AdminStats,
+  AdminSurvey,
+  AdminUser,
+} from "@/types/admin";
 
 export async function getAdminUsers(params: {
   page?: number;
@@ -76,4 +81,18 @@ export async function updateAdminUserRole(
 
 export async function deleteAdminUser(userId: string): Promise<void> {
   await apiClient.delete(`/admin/users/${userId}`);
+}
+
+export async function getAdminAuditLogs(params: {
+  page?: number;
+  limit?: number;
+}): Promise<AdminAuditLogsResponse> {
+  const query = new URLSearchParams();
+  if (params.page) query.set("page", String(params.page));
+  if (params.limit) query.set("limit", String(params.limit));
+
+  const response = await apiClient.get<ApiResponse<AdminAuditLogsResponse>>(
+    `/admin/audit-logs?${query.toString()}`,
+  );
+  return response.data.data;
 }

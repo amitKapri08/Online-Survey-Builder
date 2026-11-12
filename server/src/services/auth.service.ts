@@ -43,6 +43,10 @@ export const registerUser = async (input: RegisterInput) => {
     },
   });
 
+  // Note: Returning a distinct 409 "Email already registered" is an intentional UX decision
+  // to provide clear onboarding feedback to legitimate users, accepting the common, low-severity
+  // email enumeration trade-off here. In contrast, loginUser strictly returns generic
+  // "Invalid credentials" (401) to protect existing accounts.
   if (existingUser) {
     throw new AppError("Email already registered", 409);
   }
