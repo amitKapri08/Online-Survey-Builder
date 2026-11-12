@@ -13,6 +13,8 @@ import type {
   UpdateQuestionPayload,
   CreateOptionPayload,
   UpdateOptionPayload,
+  ResponsesPage,
+  QuestionAnalytics,
 } from "@/types/survey";
 
 export async function getSurveys(params: {
@@ -88,6 +90,13 @@ export async function deleteSurvey(id: string): Promise<void> {
   await apiClient.delete(`/surveys/${id}`);
 }
 
+export async function duplicateSurvey(id: string): Promise<SurveyDetail> {
+  const response = await apiClient.post<ApiResponse<{ survey: SurveyDetail }>>(
+    `/surveys/${id}/duplicate`,
+  );
+  return response.data.data.survey;
+}
+
 export async function createQuestion(
   surveyId: string,
   payload: CreateQuestionPayload,
@@ -96,6 +105,16 @@ export async function createQuestion(
     ApiResponse<{ question: SurveyQuestion }>
   >(`/surveys/${surveyId}/questions`, payload);
   return response.data.data.question;
+}
+
+export async function batchCreateQuestions(
+  surveyId: string,
+  questions: CreateQuestionPayload[],
+): Promise<SurveyQuestion[]> {
+  const response = await apiClient.post<
+    ApiResponse<{ questions: SurveyQuestion[] }>
+  >(`/surveys/${surveyId}/questions/batch`, { questions });
+  return response.data.data.questions;
 }
 
 export async function updateQuestion(
@@ -144,7 +163,10 @@ export async function updateOption(
 ): Promise<SurveyQuestionOption> {
   const response = await apiClient.patch<
     ApiResponse<{ option: SurveyQuestionOption }>
-  >(`/surveys/${surveyId}/questions/${questionId}/options/${optionId}`, payload);
+  >(
+    `/surveys/${surveyId}/questions/${questionId}/options/${optionId}`,
+    payload,
+  );
   return response.data.data.option;
 }
 
@@ -156,4 +178,38 @@ export async function deleteOption(
   await apiClient.delete(
     `/surveys/${surveyId}/questions/${questionId}/options/${optionId}`,
   );
+}
+
+export async function getSurveyResponses(
+  surveyId: string,
+  params: { page?: number; limit?: number; order?: "newest" | "oldest" },
+): Promise<ResponsesPage> {
+  const query = new URLSearchParams();
+  if (params.page) query.set("page", String(params.page));
+  if (params.limit) query.set("limit", String(params.limit));
+  if (params.order) query.set("order", params.order);
+
+  const response = await apiClient.get<ApiResponse<ResponsesPage>>(
+    `/surveys/${surveyId}/responses?${query.toString()}`,
+  );
+  return response.data.data;
+}
+
+export async function getSurveyAnalytics(
+  surveyId: string,
+): Promise<QuestionAnalytics[]> {
+  const response = await apiClient.get<
+    ApiResponse<{ analytics: QuestionAnalytics[] }>
+  >(`/surveys/${surveyId}/analytics`);
+  return response.data.data.analytics;
+}
+
+export async function exportResponsesCsv(surveyId: string): Promise<Blob> {
+  const response = await apiClient.get(
+    `/surveys/${surveyId}/export?format=csv`,
+    {
+      responseType: "blob",
+    },
+  );
+  return response.data as Blob;
 }

@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 import { ErrorBoundary } from "@/components/error-boundary/ErrorBoundary";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { LegalLayout } from "@/components/layout/LegalLayout";
 import {
   AdminRoute,
@@ -16,18 +17,13 @@ const LoginPage = lazy(() => import("@/pages/auth/LoginPage"));
 const RegisterPage = lazy(() => import("@/pages/auth/RegisterPage"));
 const DashboardPage = lazy(() => import("@/pages/dashboard/DashboardPage"));
 const SurveyListPage = lazy(() => import("@/pages/surveys/SurveyListPage"));
-const CreateSurveyPage = lazy(
-  () => import("@/pages/surveys/CreateSurveyPage"),
-);
+const CreateSurveyPage = lazy(() => import("@/pages/surveys/CreateSurveyPage"));
 const EditSurveyPage = lazy(() => import("@/pages/surveys/EditSurveyPage"));
-const SurveyPublicPage = lazy(
-  () => import("@/pages/public/SurveyPublicPage"),
-);
+const SurveyPublicPage = lazy(() => import("@/pages/public/SurveyPublicPage"));
 const AdminPage = lazy(() => import("@/pages/admin/AdminPage"));
+const ProfilePage = lazy(() => import("@/pages/account/ProfilePage"));
 const NotFoundPage = lazy(() => import("@/pages/NotFoundPage"));
-const PrivacyPolicyPage = lazy(
-  () => import("@/pages/legal/PrivacyPolicyPage"),
-);
+const PrivacyPolicyPage = lazy(() => import("@/pages/legal/PrivacyPolicyPage"));
 const TermsOfUsePage = lazy(() => import("@/pages/legal/TermsOfUsePage"));
 
 function App() {
@@ -46,15 +42,19 @@ function App() {
                 path={ROUTES.HOME}
                 element={<Navigate to={ROUTES.DASHBOARD} replace />}
               />
-              <Route path={ROUTES.DASHBOARD} element={<DashboardPage />} />
-              <Route path={ROUTES.SURVEYS} element={<SurveyListPage />} />
-              <Route
-                path={ROUTES.SURVEY_CREATE}
-                element={<CreateSurveyPage />}
-              />
               <Route path={ROUTES.SURVEY_EDIT} element={<EditSurveyPage />} />
-              <Route element={<AdminRoute />}>
-                <Route path={ROUTES.ADMIN} element={<AdminPage />} />
+
+              <Route element={<DashboardLayout />}>
+                <Route path={ROUTES.DASHBOARD} element={<DashboardPage />} />
+                <Route path={ROUTES.SURVEYS} element={<SurveyListPage />} />
+                <Route
+                  path={ROUTES.SURVEY_CREATE}
+                  element={<CreateSurveyPage />}
+                />
+                <Route path={ROUTES.PROFILE} element={<ProfilePage />} />
+                <Route element={<AdminRoute />}>
+                  <Route path={ROUTES.ADMIN} element={<AdminPage />} />
+                </Route>
               </Route>
             </Route>
 
@@ -75,10 +75,7 @@ function App() {
               }
             />
 
-            <Route
-              path={ROUTES.SURVEY_PUBLIC}
-              element={<SurveyPublicPage />}
-            />
+            <Route path={ROUTES.SURVEY_PUBLIC} element={<SurveyPublicPage />} />
 
             <Route path="*" element={<NotFoundPage />} />
           </Routes>

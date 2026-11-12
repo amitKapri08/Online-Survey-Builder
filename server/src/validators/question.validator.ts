@@ -59,7 +59,9 @@ function validateQuestionRequirements(
     questionType?: (typeof QUESTION_TYPES)[number] | undefined;
     minValue?: number | null | undefined;
     maxValue?: number | null | undefined;
-    options?: { optionText: string; position?: number | undefined }[] | undefined;
+    options?:
+      | { optionText: string; position?: number | undefined }[]
+      | undefined;
   },
   ctx: z.RefinementCtx,
 ): void {
@@ -179,7 +181,17 @@ export const updateOptionSchema = z
     message: "At least one field must be provided",
   });
 
+export const batchCreateQuestionsSchema = z.object({
+  questions: z
+    .array(createQuestionSchema)
+    .min(1, "At least one question is required")
+    .max(100, "Too many questions"),
+});
+
 export type CreateQuestionInput = z.infer<typeof createQuestionSchema>;
+export type BatchCreateQuestionsInput = z.infer<
+  typeof batchCreateQuestionsSchema
+>;
 export type UpdateQuestionInput = z.infer<typeof updateQuestionSchema>;
 export type ReorderQuestionsInput = z.infer<typeof reorderQuestionsSchema>;
 export type CreateOptionInput = z.infer<typeof createOptionSchema>;

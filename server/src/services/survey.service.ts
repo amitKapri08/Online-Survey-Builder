@@ -345,3 +345,104 @@ export const deleteSurvey = async (surveyId: string, userId: string) => {
 
   await prisma.survey.delete({ where: { id: surveyId } });
 };
+
+function baseTitleForCopy(title: string): string {
+  const trailingCopy = title.match(/^(.*)\s+\(Copy(?:\s+\d+)?\)$/);
+  return (trailingCopy?.[1] ?? title).trim();
+}
+
+function copyTitle(originalTitle: string, existingTitles: string[]): string {
+  const base = baseTitleForCopy(originalTitle);
+  const existing = new Set(existingTitles);
+
+  let candidate = `${base} (Copy)`;
+  let suffix = 2;
+  while (existing.has(candidate)) {
+    candidate = `${base} (Copy ${suffix})`;
+    suffix++;
+  }
+  return candidate;
+}
+
+export const duplicateSurvey = async (surveyId: string, userId: string) => {
+  const source = await prisma.survey.findUnique({
+    where: { id: surveyId },
+    select: {
+      id: true,
+      userId: true,
+      title: true,
+      description: true,
+      isAnonymous: true,
+      allowMultipleResponses: true,
+      questions: {
+        select: {
+          questionText: true,
+          questionType: true,
+          isRequired: true,
+          position: true,
+          minValue: true,
+          maxValue: true,
+          options: {
+            select: { optionText: true, position: true },
+          },
+        },
+        orderBy: { position: "asc" as const },
+      },
+    },
+  });
+
+  if (!source) {
+    throw new AppError("Survey not found", 404);
+  }
+
+  if (source.userId !== userId) {
+    throw new AppError("Survey not found", 404);
+  }
+
+  const existingTitles = await prisma.survey.findMany({
+    where: { userId },
+    select: { title: true },
+  });
+  const title = copyTitle(
+    source.title,
+    existingTitles.map((survey) => survey.title),
+  );
+
+  const slug = await generateUniqueSlug(title);
+
+  const survey = await prisma.survey.create({
+    data: {
+      title,
+      description: source.description,
+      slug,
+      isAnonymous: source.isAnonymous,
+      allowMultipleResponses: source.allowMultipleResponses,
+      userId,
+      questions: {
+        create: source.questions.map((question) => ({
+          questionText: question.questionText,
+          questionType: question.questionType,
+          isRequired: question.isRequired,
+          position: question.position,
+          minValue: question.minValue,
+          maxValue: question.maxValue,
+          options: {
+            create: question.options.map((option) => ({
+              optionText: option.optionText,
+              position: option.position,
+            })),
+          },
+        })),
+      },
+    },
+    select: {
+      ...surveyDetailSelect,
+      questions: {
+        ...questionDetailSelect,
+        orderBy: { position: "asc" as const },
+      },
+    },
+  });
+
+  return survey;
+};

@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { TemplateGalleryModal } from "@/components/survey-builder";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,7 +29,10 @@ const createSurveyFormSchema = z.object({
     .string()
     .trim()
     .max(100)
-    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Only lowercase letters, numbers, and hyphens")
+    .regex(
+      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+      "Only lowercase letters, numbers, and hyphens",
+    )
     .optional()
     .or(z.literal("")),
   isAnonymous: z.boolean(),
@@ -77,7 +79,7 @@ export default function CreateSurveyPage() {
   };
 
   return (
-    <DashboardLayout>
+    <>
       <div className="mb-8">
         <Button
           variant="ghost"
@@ -97,10 +99,7 @@ export default function CreateSurveyPage() {
               Start from scratch, or pick a template to get going faster.
             </p>
           </div>
-          <Button
-            variant="brand"
-            onClick={() => setTemplatesOpen(true)}
-          >
+          <Button variant="brand" onClick={() => setTemplatesOpen(true)}>
             <LayoutTemplate data-icon="inline-start" />
             Start from a template
           </Button>
@@ -133,7 +132,9 @@ export default function CreateSurveyPage() {
                 aria-invalid={!!errors.title}
               />
               {errors.title && (
-                <p className="text-xs text-destructive">{errors.title.message}</p>
+                <p className="text-xs text-destructive">
+                  {errors.title.message}
+                </p>
               )}
             </div>
 
@@ -163,10 +164,14 @@ export default function CreateSurveyPage() {
               />
               <p className="text-xs text-muted-foreground">
                 Leave empty to auto-generate. Your survey link will be{" "}
-                <span className="font-medium text-foreground">/s/your-slug</span>
+                <span className="font-medium text-foreground">
+                  /s/your-slug
+                </span>
               </p>
               {errors.slug && (
-                <p className="text-xs text-destructive">{errors.slug.message}</p>
+                <p className="text-xs text-destructive">
+                  {errors.slug.message}
+                </p>
               )}
             </div>
 
@@ -213,6 +218,6 @@ export default function CreateSurveyPage() {
         open={templatesOpen}
         onOpenChange={setTemplatesOpen}
       />
-    </DashboardLayout>
+    </>
   );
 }

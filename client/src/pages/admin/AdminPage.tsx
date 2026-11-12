@@ -1,7 +1,13 @@
 import { useState } from "react";
-import { Users, ClipboardList, MessageSquare } from "lucide-react";
+import {
+  Users,
+  ClipboardList,
+  MessageSquare,
+  Trash2,
+  UserCog,
+} from "lucide-react";
+import { toast } from "sonner";
 
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -10,11 +16,27 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Loader } from "@/components/ui/loader";
 import { Pagination } from "@/components/ui/pagination";
 import { Select } from "@/components/ui/select";
-import { useAdminStats, useAdminUsers, useAdminSurveys } from "@/hooks/useAdminApi";
+import {
+  useAdminStats,
+  useAdminUsers,
+  useAdminSurveys,
+  useUpdateAdminUserRole,
+  useDeleteAdminUser,
+} from "@/hooks/useAdminApi";
 import { getApiErrorMessage } from "@/lib/apiError";
 import type { SurveyStatus } from "@/types/survey";
 
@@ -30,6 +52,13 @@ export default function AdminPage() {
   const [surveyStatus, setSurveyStatus] = useState("");
   const [userSearch, setUserSearch] = useState("");
   const [userSearchInput, setUserSearchInput] = useState("");
+  const [deleteUserId, setDeleteUserId] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+
+  const roleMutation = useUpdateAdminUserRole();
+  const deleteMutation = useDeleteAdminUser();
 
   const {
     data: stats,
@@ -57,8 +86,31 @@ export default function AdminPage() {
 
   const loadError = statsError ?? usersError ?? surveysError;
 
+  const handleToggleRole = async (userId: string, role: string) => {
+    try {
+      await roleMutation.mutateAsync({
+        userId,
+        role: role === "ADMIN" ? "USER" : "ADMIN",
+      });
+      toast.success("User role updated");
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Failed to update role"));
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteUserId) return;
+    try {
+      await deleteMutation.mutateAsync(deleteUserId.id);
+      toast.success("User deactivated");
+      setDeleteUserId(null);
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Failed to deactivate user"));
+    }
+  };
+
   return (
-    <DashboardLayout>
+    <>
       <div className="mb-8">
         <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
           Admin Dashboard
@@ -93,7 +145,9 @@ export default function AdminPage() {
                 <p className="text-3xl font-bold text-foreground">
                   {stats?.totalUsers ?? 0}
                 </p>
-                <p className="text-xs text-muted-foreground">registered users</p>
+                <p className="text-xs text-muted-foreground">
+                  registered users
+                </p>
               </>
             )}
           </CardContent>
@@ -143,7 +197,9 @@ export default function AdminPage() {
       <Card className="mt-6">
         <CardHeader>
           <CardTitle>Users</CardTitle>
-          <CardDescription>All registered users on the platform.</CardDescription>
+          <CardDescription>
+            All registered users on the platform.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="mb-4">
@@ -194,6 +250,28 @@ export default function AdminPage() {
                       >
                         {user.role.toLowerCase()}
                       </Badge>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => handleToggleRole(user.id, user.role)}
+                        disabled={roleMutation.isPending}
+                        aria-label={`Toggle admin role for ${user.name}`}
+                      >
+                        <UserCog className="size-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() =>
+                          setDeleteUserId({ id: user.id, name: user.name })
+                        }
+                        disabled={deleteMutation.isPending}
+                        aria-label={`Deactivate ${user.name}`}
+                      >
+                        <Trash2 className="size-4 text-destructive" />
+                      </Button>
                     </div>
                   </div>
                 ))}
@@ -276,6 +354,35 @@ export default function AdminPage() {
           )}
         </CardContent>
       </Card>
-    </DashboardLayout>
+
+      <Dialog
+        open={!!deleteUserId}
+        onOpenChange={(open) => !open && setDeleteUserId(null)}
+      >
+        <DialogContent>
+          <DialogClose onClick={() => setDeleteUserId(null)} />
+          <DialogHeader>
+            <DialogTitle>Deactivate user</DialogTitle>
+            <DialogDescription>
+              {deleteUserId
+                ? `${deleteUserId.name} will lose access immediately. Their surveys and responses are kept, but they can no longer sign in.`
+                : null}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteUserId(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={deleteMutation.isPending}
+            >
+              {deleteMutation.isPending ? "Deactivating..." : "Deactivate"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

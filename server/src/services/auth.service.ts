@@ -10,6 +10,7 @@ import {
 } from "../utils/jwt.js";
 import { getRefreshTokenExpiryDate } from "../utils/cookies.js";
 import type {
+  ChangePasswordInput,
   LoginInput,
   RegisterInput,
 } from "../validators/auth.validator.js";
@@ -99,10 +100,11 @@ export const loginUser = async (input: LoginInput) => {
       createdAt: true,
       updatedAt: true,
       password: true,
+      deletedAt: true,
     },
   });
 
-  if (!user) {
+  if (!user || user.deletedAt) {
     throw new AppError("Invalid credentials", 401);
   }
 
@@ -114,6 +116,59 @@ export const loginUser = async (input: LoginInput) => {
 
   const { password: _, ...userWithoutPassword } = user;
   const { accessToken, refreshToken } = await issueTokens(user);
+
+  return {
+    user: userWithoutPassword,
+    accessToken,
+    refreshToken,
+  };
+};
+
+export const changePassword = async (
+  userId: string,
+  input: ChangePasswordInput,
+) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      createdAt: true,
+      updatedAt: true,
+      password: true,
+      deletedAt: true,
+    },
+  });
+
+  if (!user || user.deletedAt) {
+    throw new AppError("User not found", 404);
+  }
+
+  const passwordMatches = await bcrypt.compare(
+    input.currentPassword,
+    user.password,
+  );
+
+  if (!passwordMatches) {
+    throw new AppError("Current password is incorrect", 400);
+  }
+
+  const passwordHash = await bcrypt.hash(input.newPassword, SALT_ROUNDS);
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { password: passwordHash },
+  });
+
+  await prisma.refreshSession.updateMany({
+    where: { userId },
+    data: { revokedAt: new Date() },
+  });
+
+  const { accessToken, refreshToken } = await issueTokens(user);
+  const { password: _, ...userWithoutPassword } = user;
 
   return {
     user: userWithoutPassword,

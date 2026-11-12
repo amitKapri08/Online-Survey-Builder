@@ -9,6 +9,7 @@ import {
   updateSurvey,
   deleteSurvey,
   recordSurveyView,
+  duplicateSurvey,
 } from "../services/survey.service.js";
 import {
   createSurveySchema,
@@ -170,6 +171,29 @@ export const handleDeleteSurvey = async (
     res.status(200).json({
       success: true,
       message: "Survey deleted successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const handleDuplicateSurvey = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      throw new AppError("Authentication required", 401);
+    }
+
+    const surveyId = req.params.id as string;
+    const survey = await duplicateSurvey(surveyId, req.user.id);
+
+    res.status(201).json({
+      success: true,
+      message: "Survey duplicated successfully",
+      data: { survey },
     });
   } catch (error) {
     next(error);

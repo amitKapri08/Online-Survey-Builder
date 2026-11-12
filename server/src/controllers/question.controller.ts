@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 
 import {
   createQuestion,
+  batchCreateQuestions,
   updateQuestion,
   deleteQuestion,
   reorderQuestions,
@@ -11,6 +12,7 @@ import {
 } from "../services/question.service.js";
 import {
   createQuestionSchema,
+  batchCreateQuestionsSchema,
   updateQuestionSchema,
   reorderQuestionsSchema,
   createOptionSchema,
@@ -42,6 +44,30 @@ export const handleCreateQuestion = async (
   }
 };
 
+export const handleBatchCreateQuestions = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      throw new AppError("Authentication required", 401);
+    }
+
+    const surveyId = req.params.surveyId as string;
+    const input = batchCreateQuestionsSchema.parse(req.body);
+    const questions = await batchCreateQuestions(surveyId, req.user.id, input);
+
+    res.status(201).json({
+      success: true,
+      message: "Questions added successfully",
+      data: { questions },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const handleUpdateQuestion = async (
   req: Request,
   res: Response,
@@ -55,7 +81,12 @@ export const handleUpdateQuestion = async (
     const surveyId = req.params.surveyId as string;
     const questionId = req.params.questionId as string;
     const input = updateQuestionSchema.parse(req.body);
-    const question = await updateQuestion(surveyId, questionId, req.user.id, input);
+    const question = await updateQuestion(
+      surveyId,
+      questionId,
+      req.user.id,
+      input,
+    );
 
     res.status(200).json({
       success: true,

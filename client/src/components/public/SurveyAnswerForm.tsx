@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { useAuth } from "@/context/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -14,13 +15,16 @@ import type {
 
 interface SurveyAnswerFormProps {
   questions: SurveyQuestion[];
+  isAnonymous?: boolean;
   isSubmitting: boolean;
   onSubmit: (payload: SubmitResponsePayload) => void | Promise<void>;
 }
 
 function isChoiceType(type: QuestionType): boolean {
   return (
-    type === "SINGLE_CHOICE" || type === "MULTIPLE_CHOICE" || type === "DROPDOWN"
+    type === "SINGLE_CHOICE" ||
+    type === "MULTIPLE_CHOICE" ||
+    type === "DROPDOWN"
   );
 }
 
@@ -32,11 +36,14 @@ function maxLengthFor(type: QuestionType): number | undefined {
 
 function SurveyAnswerForm({
   questions,
+  isAnonymous = false,
   isSubmitting,
   onSubmit,
 }: SurveyAnswerFormProps) {
+  const { user } = useAuth();
   const [values, setValues] = useState<Record<string, string | string[]>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitAnonymously, setSubmitAnonymously] = useState(false);
 
   const setValue = (questionId: string, value: string | string[]) => {
     setValues((current) => ({ ...current, [questionId]: value }));
@@ -61,9 +68,7 @@ function SurveyAnswerForm({
     return Array.isArray(current) ? current : [];
   };
 
-  const validateQuestion = (
-    question: SurveyQuestion,
-  ): string | null => {
+  const validateQuestion = (question: SurveyQuestion): string | null => {
     const raw = values[question.id];
     const type = question.questionType;
 
@@ -128,7 +133,10 @@ function SurveyAnswerForm({
         });
         continue;
       }
-      if (question.questionType === "YES_NO" || !isChoiceType(question.questionType)) {
+      if (
+        question.questionType === "YES_NO" ||
+        !isChoiceType(question.questionType)
+      ) {
         answers.push({ questionId: question.id, value: String(raw) });
         continue;
       }
@@ -141,7 +149,14 @@ function SurveyAnswerForm({
       answers.push({ questionId: question.id, value: String(raw) });
     }
 
-    await onSubmit({ answers });
+    await onSubmit({
+      answers,
+      submitAnonymously: isAnonymous
+        ? user
+          ? submitAnonymously
+          : true
+        : false,
+    });
   };
 
   return (
@@ -151,8 +166,8 @@ function SurveyAnswerForm({
         const error = errors[question.id];
         const current = values[question.id];
         const selected = Array.isArray(current) ? current : [];
-        const ratingMin = type === "RATING" ? question.minValue ?? 1 : 1;
-        const ratingMax = type === "RATING" ? question.maxValue ?? 5 : 5;
+        const ratingMin = type === "RATING" ? (question.minValue ?? 1) : 1;
+        const ratingMax = type === "RATING" ? (question.maxValue ?? 5) : 5;
 
         return (
           <div key={question.id} className="space-y-2.5">
@@ -161,7 +176,10 @@ function SurveyAnswerForm({
                 {index + 1}. {question.questionText}
               </span>
               {question.isRequired && (
-                <span className="text-sm text-destructive" aria-label="Required">
+                <span
+                  className="text-sm text-destructive"
+                  aria-label="Required"
+                >
                   *
                 </span>
               )}
@@ -280,9 +298,7 @@ function SurveyAnswerForm({
                   value={
                     typeof current === "string" && current !== "" ? current : ""
                   }
-                  onChange={(e) =>
-                    setValue(question.id, e.target.value)
-                  }
+                  onChange={(e) => setValue(question.id, e.target.value)}
                   aria-invalid={!!error}
                   disabled={isSubmitting}
                 />
@@ -328,19 +344,35 @@ function SurveyAnswerForm({
               </div>
             )}
 
-            {error && (
-              <p className="text-xs text-destructive">{error}</p>
-            )}
+            {error && <p className="text-xs text-destructive">{error}</p>}
           </div>
         );
       })}
 
+      {isAnonymous && user && (
+        <div className="rounded-lg border border-border bg-muted/50 p-3.5 space-y-1">
+          <label className="flex cursor-pointer items-start gap-2.5 text-sm font-medium text-foreground">
+            <input
+              type="checkbox"
+              checked={submitAnonymously}
+              onChange={(e) => setSubmitAnonymously(e.target.checked)}
+              className="mt-0.5 size-4 rounded border-input text-primary focus:ring-primary"
+              disabled={isSubmitting}
+            />
+            <div>
+              <span>Submit anonymously</span>
+              <p className="text-xs font-normal text-muted-foreground">
+                {submitAnonymously
+                  ? "Your name and email will not be shared with the survey creator."
+                  : `Submitting as ${user.name} (${user.email}).`}
+              </p>
+            </div>
+          </label>
+        </div>
+      )}
+
       <div className="border-t pt-4">
-        <Button
-          type="submit"
-          variant="brand"
-          disabled={isSubmitting}
-        >
+        <Button type="submit" variant="brand" disabled={isSubmitting}>
           {isSubmitting ? "Submitting..." : "Submit response"}
         </Button>
       </div>

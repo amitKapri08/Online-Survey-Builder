@@ -41,3 +41,25 @@ export const authenticate = (
     next(error);
   }
 };
+
+export const optionalAuthenticate = (
+  req: Request,
+  _res: Response,
+  next: NextFunction,
+): void => {
+  try {
+    const token = req.cookies?.[AUTH_COOKIE_NAME];
+    if (token) {
+      const payload = verifyToken(token);
+      req.user = {
+        id: payload.userId,
+        role: payload.role,
+      };
+    }
+  } catch {
+    // For optional authentication, invalid or expired tokens are simply ignored
+    req.user = undefined;
+  }
+
+  next();
+};

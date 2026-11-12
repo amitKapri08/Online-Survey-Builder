@@ -64,7 +64,12 @@ function SettingsTabContent({
   survey,
   isEditable,
 }: {
-  survey: { slug: string; isAnonymous: boolean; allowMultipleResponses: boolean };
+  survey: {
+    slug: string;
+    description: string | null;
+    isAnonymous: boolean;
+    allowMultipleResponses: boolean;
+  };
   isEditable: boolean;
 }) {
   const updateMutation = useUpdateSurvey();
@@ -78,7 +83,7 @@ function SettingsTabContent({
   } = useForm<SurveyDetailsFormValues>({
     resolver: zodResolver(surveyDetailsSchema),
     defaultValues: {
-      description: "",
+      description: survey.description ?? "",
       slug: survey.slug,
       isAnonymous: survey.isAnonymous,
       allowMultipleResponses: survey.allowMultipleResponses,
@@ -365,6 +370,7 @@ function EditSurveyPageContent() {
 
         {activeTab === "results" && (
           <ResultsTab
+            surveyId={survey.id}
             responseCount={survey._count.responses}
             viewCount={survey.viewCount}
             questionCount={survey._count.questions}
@@ -391,7 +397,9 @@ function EditSurveyPageContent() {
           <DialogClose onClick={() => setConfirmAction(null)} />
           <DialogHeader>
             <DialogTitle>
-              {confirmAction === "PUBLISHED" ? "Publish survey" : "Close survey"}
+              {confirmAction === "PUBLISHED"
+                ? "Publish survey"
+                : "Close survey"}
             </DialogTitle>
             <DialogDescription>
               {confirmAction === "PUBLISHED"
@@ -404,7 +412,9 @@ function EditSurveyPageContent() {
               Cancel
             </Button>
             <Button
-              variant={confirmAction === "PUBLISHED" ? "success" : "destructive"}
+              variant={
+                confirmAction === "PUBLISHED" ? "success" : "destructive"
+              }
               onClick={() => confirmAction && handleStatusChange(confirmAction)}
               disabled={updateMutation.isPending}
             >
