@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Mail, User } from "lucide-react";
 import { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { AxiosError } from "axios";
 import { Link } from "react-router-dom";
 
@@ -28,7 +28,6 @@ export function RegisterForm() {
   const {
     register,
     handleSubmit,
-    watch,
     control,
     formState: { errors },
   } = useForm<RegisterFormValues>({
@@ -42,7 +41,7 @@ export function RegisterForm() {
     },
   });
 
-  const password = watch("password");
+  const password = useWatch({ control, name: "password" });
   const passwordStrength = getPasswordStrength(password || "");
 
   const onSubmit = async (values: RegisterFormValues) => {
@@ -77,27 +76,28 @@ export function RegisterForm() {
 
   const isSubmitting = registerMutation.isPending;
 
-function getPasswordStrength(pwd: string): {
-  score: number;
-  label: string;
-  color: string;
-  percent: number;
-} {
-  if (!pwd) return { score: 0, label: "Not set", color: "bg-muted", percent: 0 };
-  let score = 0;
-  if (pwd.length >= 8) score += 1;
-  if (/[A-Z]/.test(pwd)) score += 1;
-  if (/[0-9]/.test(pwd)) score += 1;
-  if (/[^A-Za-z0-9]/.test(pwd)) score += 1;
+  function getPasswordStrength(pwd: string): {
+    score: number;
+    label: string;
+    color: string;
+    percent: number;
+  } {
+    if (!pwd)
+      return { score: 0, label: "Not set", color: "bg-muted", percent: 0 };
+    let score = 0;
+    if (pwd.length >= 8) score += 1;
+    if (/[A-Z]/.test(pwd)) score += 1;
+    if (/[0-9]/.test(pwd)) score += 1;
+    if (/[^A-Za-z0-9]/.test(pwd)) score += 1;
 
-  if (score <= 1)
-    return { score, label: "Weak", color: "bg-danger-500", percent: 25 };
-  if (score === 2)
-    return { score, label: "Fair", color: "bg-amber-500", percent: 50 };
-  if (score === 3)
-    return { score, label: "Good", color: "bg-blue-500", percent: 75 };
-  return { score, label: "Strong", color: "bg-emerald-500", percent: 100 };
-}
+    if (score <= 1)
+      return { score, label: "Weak", color: "bg-danger-500", percent: 25 };
+    if (score === 2)
+      return { score, label: "Fair", color: "bg-amber-500", percent: 50 };
+    if (score === 3)
+      return { score, label: "Good", color: "bg-blue-500", percent: 75 };
+    return { score, label: "Strong", color: "bg-emerald-500", percent: 100 };
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
@@ -151,7 +151,9 @@ function getPasswordStrength(pwd: string): {
       {password.length > 0 && (
         <div className="space-y-1.5 pt-0.5">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-[11px] text-muted-foreground">Password strength</span>
+            <span className="text-[11px] text-muted-foreground">
+              Password strength
+            </span>
             <span
               className={cn(
                 "font-semibold text-[11px]",

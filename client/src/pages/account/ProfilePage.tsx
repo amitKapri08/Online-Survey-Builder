@@ -12,7 +12,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -27,10 +27,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useAuth } from "@/context/useAuth";
-import {
-  useChangePassword,
-  useUpdateProfile,
-} from "@/hooks/useAuthApi";
+import { useChangePassword, useUpdateProfile } from "@/hooks/useAuthApi";
 import { ROUTES } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import {
@@ -58,7 +55,8 @@ function getPasswordStrength(pwd: string): {
   color: string;
   percent: number;
 } {
-  if (!pwd) return { score: 0, label: "Not set", color: "bg-muted", percent: 0 };
+  if (!pwd)
+    return { score: 0, label: "Not set", color: "bg-muted", percent: 0 };
   let score = 0;
   if (pwd.length >= 8) score += 1;
   if (/[A-Z]/.test(pwd)) score += 1;
@@ -96,7 +94,8 @@ export default function ProfilePage() {
     },
   });
 
-  const newPasswordValue = passwordForm.watch("newPassword") || "";
+  const newPasswordValue =
+    useWatch({ control: passwordForm.control, name: "newPassword" }) || "";
   const strength = getPasswordStrength(newPasswordValue);
 
   const passwordRequirements = [
@@ -282,7 +281,8 @@ export default function ProfilePage() {
                     />
                   </div>
                   <p className="text-[11px] text-muted-foreground">
-                    Primary account email address used for login and notifications.
+                    Primary account email address used for login and
+                    notifications.
                   </p>
                 </div>
 
@@ -293,7 +293,9 @@ export default function ProfilePage() {
                     className="h-11 rounded-xl w-full font-semibold shadow-md shadow-brand-500/20"
                     disabled={updateProfileMutation.isPending}
                   >
-                    {updateProfileMutation.isPending ? "Saving..." : "Save Profile Changes"}
+                    {updateProfileMutation.isPending
+                      ? "Saving..."
+                      : "Save Profile Changes"}
                   </Button>
                 </div>
               </form>
@@ -312,7 +314,8 @@ export default function ProfilePage() {
                 Password & Security
               </CardTitle>
               <CardDescription>
-                Keep your account protected with a strong cryptographic password.
+                Keep your account protected with a strong cryptographic
+                password.
               </CardDescription>
             </CardHeader>
 
@@ -421,7 +424,9 @@ export default function ProfilePage() {
                   label="Confirm New Password"
                   placeholder="Re-type your new password"
                   autoComplete="new-password"
-                  error={passwordForm.formState.errors.confirmNewPassword?.message}
+                  error={
+                    passwordForm.formState.errors.confirmNewPassword?.message
+                  }
                   disabled={changePasswordMutation.isPending}
                   {...passwordForm.register("confirmNewPassword")}
                 />
@@ -429,7 +434,8 @@ export default function ProfilePage() {
                 <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 p-3.5 text-xs text-muted-foreground flex items-start gap-2.5">
                   <KeyRound className="size-4 text-brand-500 shrink-0 mt-0.5" />
                   <span>
-                    Changing your password will invalidate active sessions on other devices for maximum security.
+                    Changing your password will invalidate active sessions on
+                    other devices for maximum security.
                   </span>
                 </div>
 

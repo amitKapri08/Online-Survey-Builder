@@ -8,11 +8,10 @@ beforeAll(() => {
   server.listen({ onUnhandledRequest: "error" });
 
   if (typeof Blob !== "undefined" && typeof Blob.prototype.stream !== "function") {
-    Blob.prototype.stream = function () {
-      const self = this;
+    Blob.prototype.stream = function (this: Blob) {
       return new ReadableStream({
-        async pull(controller) {
-          const buffer = await self.arrayBuffer();
+        pull: async (controller) => {
+          const buffer = await this.arrayBuffer();
           controller.enqueue(new Uint8Array(buffer));
           controller.close();
         },
