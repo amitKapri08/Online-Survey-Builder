@@ -1,20 +1,11 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import {
-  ArrowLeft,
-  Send,
-  CircleStop,
-  Pencil,
-  Plus,
-  Lock,
-} from "lucide-react";
+import { useCallback, useState } from "react";
+import { useParams } from "react-router-dom";
+import { Lock } from "lucide-react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -23,7 +14,6 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader } from "@/components/ui/loader";
@@ -37,20 +27,22 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
+import {
+  BuilderHeader,
+  BuilderSaveProvider,
+  BuildTab,
+  PreviewModal,
+  ResultsTab,
+} from "@/components/survey-builder";
+import type { BuilderTab } from "@/components/survey-builder";
 import { useSurvey, useUpdateSurvey } from "@/hooks/useSurveyApi";
-import { ROUTES } from "@/lib/routes";
+import { useAutosaveField } from "@/hooks/useAutosaveField";
+import { useBuilderSave } from "@/hooks/useBuilderSave";
 import { getApiErrorMessage } from "@/lib/apiError";
 import { cn } from "@/lib/utils";
 import type { SurveyStatus } from "@/types/survey";
 
-const STATUS_BADGE: Record<SurveyStatus, "draft" | "published" | "closed"> = {
-  DRAFT: "draft",
-  PUBLISHED: "published",
-  CLOSED: "closed",
-};
-
 const surveyDetailsSchema = z.object({
-  title: z.string().trim().min(1, "Title is required").max(200),
   description: z.string().trim().max(2000).optional(),
   slug: z
     .string()
@@ -68,42 +60,206 @@ const surveyDetailsSchema = z.object({
 
 type SurveyDetailsFormValues = z.infer<typeof surveyDetailsSchema>;
 
-export default function EditSurveyPage() {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const { data: survey, isLoading, error } = useSurvey(id ?? "");
+function SettingsTabContent({
+  survey,
+  isEditable,
+}: {
+  survey: { slug: string; isAnonymous: boolean; allowMultipleResponses: boolean };
+  isEditable: boolean;
+}) {
   const updateMutation = useUpdateSurvey();
-  const [confirmAction, setConfirmAction] = useState<SurveyStatus | null>(null);
-
-  const isEditable = survey?.status === "DRAFT";
+  const { id } = useParams<{ id: string }>();
 
   const {
     register,
     handleSubmit,
-    reset,
     control,
     formState: { errors, isDirty },
   } = useForm<SurveyDetailsFormValues>({
     resolver: zodResolver(surveyDetailsSchema),
+    defaultValues: {
+      description: "",
+      slug: survey.slug,
+      isAnonymous: survey.isAnonymous,
+      allowMultipleResponses: survey.allowMultipleResponses,
+    },
   });
 
   const watchedSlug = useWatch({ control, name: "slug" });
 
-  useEffect(() => {
-    if (survey) {
-      reset({
-        title: survey.title,
-        description: survey.description ?? "",
-        slug: survey.slug,
-        isAnonymous: survey.isAnonymous,
-        allowMultipleResponses: survey.allowMultipleResponses,
+  const handleSave = async (values: SurveyDetailsFormValues) => {
+    if (!id) return;
+    try {
+      await updateMutation.mutateAsync({
+        id,
+        payload: {
+          description: values.description || undefined,
+          slug: values.slug || undefined,
+          isAnonymous: values.isAnonymous,
+          allowMultipleResponses: values.allowMultipleResponses,
+        },
       });
+      toast.success("Settings saved");
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Failed to save settings"));
     }
-  }, [survey, reset]);
+  };
+
+  return (
+    <Card className="max-w-2xl">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          Survey settings
+          {!isEditable && <Lock className="size-4 text-muted-foreground" />}
+        </CardTitle>
+        <CardDescription>
+          {isEditable
+            ? "Configure your survey settings. These can be changed while the survey is in draft."
+            : "Settings are locked once the survey is published."}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit(handleSave)} className="space-y-5">
+          <div className="space-y-2">
+            <Label htmlFor="settings-description">Description</Label>
+            <Textarea
+              id="settings-description"
+              placeholder="Optional description for your survey..."
+              rows={3}
+              {...register("description")}
+              disabled={!isEditable}
+              aria-invalid={!!errors.description}
+            />
+            {errors.description && (
+              <p className="text-xs text-destructive">
+                {errors.description.message}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="settings-slug">Custom slug</Label>
+            <Input
+              id="settings-slug"
+              placeholder="auto-generated from title"
+              {...register("slug")}
+              disabled={!isEditable}
+              aria-invalid={!!errors.slug}
+            />
+            <p className="text-xs text-muted-foreground">
+              Your survey link is{" "}
+              <span className="font-medium text-foreground">
+                /s/{watchedSlug || survey.slug}
+              </span>
+            </p>
+            {errors.slug && (
+              <p className="text-xs text-destructive">{errors.slug.message}</p>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <Label
+              className={cn(
+                "flex items-center gap-2",
+                !isEditable && "cursor-not-allowed opacity-50",
+              )}
+            >
+              <input
+                type="checkbox"
+                className="size-4 rounded border-input"
+                {...register("isAnonymous")}
+                disabled={!isEditable}
+              />
+              Allow anonymous responses
+            </Label>
+            <Label
+              className={cn(
+                "flex items-center gap-2",
+                !isEditable && "cursor-not-allowed opacity-50",
+              )}
+            >
+              <input
+                type="checkbox"
+                className="size-4 rounded border-input"
+                {...register("allowMultipleResponses")}
+                disabled={!isEditable}
+              />
+              Allow multiple responses per person
+            </Label>
+          </div>
+
+          {isEditable && (
+            <div className="flex gap-3 pt-2">
+              <Button
+                type="submit"
+                variant="brand"
+                disabled={updateMutation.isPending || !isDirty}
+              >
+                {updateMutation.isPending ? "Saving..." : "Save settings"}
+              </Button>
+            </div>
+          )}
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+
+function EditSurveyPageContent() {
+  const { id } = useParams<{ id: string }>();
+  const { data: survey, isLoading, error } = useSurvey(id ?? "");
+  const updateMutation = useUpdateSurvey();
+  const [activeTab, setActiveTab] = useState<BuilderTab>("build");
+  const [confirmAction, setConfirmAction] = useState<SurveyStatus | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+
+  const isEditable = survey?.status === "DRAFT";
+  const resourceId = survey?.id ?? id ?? "";
+  const { flushPendingSaves } = useBuilderSave();
+
+  const titleAutosave = useAutosaveField({
+    resourceType: "survey",
+    resourceId,
+    fieldName: "title",
+    enabled: isEditable,
+    onSave: async (value) => {
+      const trimmed = String(value).trim();
+      if (!id || !survey) return;
+      if (!trimmed || trimmed === survey.title) return;
+      try {
+        await updateMutation.mutateAsync({ id, payload: { title: trimmed } });
+      } catch (error) {
+        toast.error(getApiErrorMessage(error, "Failed to save title"));
+        throw error;
+      }
+    },
+  });
+
+  const descriptionAutosave = useAutosaveField({
+    resourceType: "survey",
+    resourceId,
+    fieldName: "description",
+    enabled: isEditable,
+    onSave: async (value) => {
+      if (!id || !survey) return;
+      const next = String(value).trim();
+      if (next === (survey.description ?? "")) return;
+      try {
+        await updateMutation.mutateAsync({
+          id,
+          payload: { description: next },
+        });
+      } catch (error) {
+        toast.error(getApiErrorMessage(error, "Failed to save description"));
+        throw error;
+      }
+    },
+  });
 
   const handleStatusChange = async (newStatus: SurveyStatus) => {
     if (!id) return;
     try {
+      await flushPendingSaves();
       await updateMutation.mutateAsync({
         id,
         payload: { status: newStatus },
@@ -140,285 +296,92 @@ export default function EditSurveyPage() {
     }
   };
 
-  const handleSaveDetails = async (values: SurveyDetailsFormValues) => {
-    if (!id) return;
+  const handlePreviewOpen = useCallback(() => {
+    setPreviewOpen(true);
+  }, []);
+
+  const handleShare = useCallback(async () => {
+    if (!survey) return;
+    await flushPendingSaves();
+    const url = `${window.location.origin}/s/${survey.slug}`;
     try {
-      await updateMutation.mutateAsync({
-        id,
-        payload: {
-          title: values.title,
-          description: values.description || undefined,
-          slug: values.slug || undefined,
-          isAnonymous: values.isAnonymous,
-          allowMultipleResponses: values.allowMultipleResponses,
-        },
-      });
-      toast.success("Survey details saved");
-    } catch (error) {
-      toast.error(getApiErrorMessage(error, "Failed to save survey details"));
+      await navigator.clipboard.writeText(url);
+      toast.success("Link copied to clipboard");
+    } catch {
+      toast.info(url);
     }
-  };
+  }, [survey, flushPendingSaves]);
 
   if (isLoading) {
     return (
-      <DashboardLayout>
-        <div className="py-12">
+      <div className="flex min-h-screen flex-col bg-muted">
+        <div className="flex flex-1 items-center justify-center py-12">
           <Loader label="Loading survey..." />
         </div>
-      </DashboardLayout>
+      </div>
     );
   }
 
   if (error || !survey) {
     return (
-      <DashboardLayout>
-        <div className="py-12 text-center text-sm text-muted-foreground">
+      <div className="flex min-h-screen flex-col bg-muted">
+        <div className="flex flex-1 items-center justify-center py-12 text-sm text-muted-foreground">
           Survey not found.
         </div>
-      </DashboardLayout>
+      </div>
     );
   }
 
   return (
-    <DashboardLayout>
-      <div className="mb-8">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => navigate(ROUTES.SURVEYS)}
-          className="mb-4"
-        >
-          <ArrowLeft data-icon="inline-start" />
-          Back to surveys
-        </Button>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                {survey.title}
-              </h1>
-              <Badge variant={STATUS_BADGE[survey.status]}>
-                {survey.status.toLowerCase()}
-              </Badge>
-            </div>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {isEditable
-                ? "Edit your survey details below before publishing."
-                : "This survey is no longer editable."}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            {survey.status === "DRAFT" && (
-              <Button
-                variant="success"
-                size="sm"
-                onClick={() => setConfirmAction("PUBLISHED")}
-                disabled={updateMutation.isPending}
-              >
-                <Send data-icon="inline-start" />
-                Publish
-              </Button>
-            )}
-            {survey.status === "PUBLISHED" && (
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => setConfirmAction("CLOSED")}
-                disabled={updateMutation.isPending}
-              >
-                <CircleStop data-icon="inline-start" />
-                Close
-              </Button>
-            )}
-          </div>
-        </div>
-      </div>
+    <div className="flex min-h-screen flex-col bg-muted">
+      <BuilderHeader
+        surveyId={survey.id}
+        title={survey.title}
+        status={survey.status}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        onPreviewOpen={handlePreviewOpen}
+        onPublish={() => setConfirmAction("PUBLISHED")}
+        onShare={handleShare}
+        onTitleChange={titleAutosave.setValue}
+      />
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Responses</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-foreground">
-              {survey._count.responses}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {survey._count.responses === 1 ? "response" : "responses"}{" "}
-              collected
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Questions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-foreground">
-              {survey._count.questions}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {survey._count.questions === 1 ? "question" : "questions"} added
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Views</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-foreground">
-              {survey.viewCount}
-            </p>
-            <p className="text-xs text-muted-foreground">page views</p>
-          </CardContent>
-        </Card>
-      </div>
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 lg:px-8">
+        {activeTab === "build" && (
+          <BuildTab
+            surveyId={survey.id}
+            title={survey.title}
+            description={survey.description ?? ""}
+            questions={survey.questions ?? []}
+            isEditable={isEditable}
+            onTitleChange={titleAutosave.setValue}
+            onDescriptionChange={descriptionAutosave.setValue}
+          />
+        )}
 
-      <Card className="mt-4">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            Survey details
-            {!isEditable && <Lock className="size-4 text-muted-foreground" />}
-          </CardTitle>
-          <CardDescription>
-            {isEditable
-              ? "Your survey link stays the same while you work on it. Fields are frozen once published."
-              : "Publish locks the title, description, slug, and settings."}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(handleSaveDetails)} className="space-y-5">
-            <div className="space-y-2">
-              <Label htmlFor="title">
-                Title <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="title"
-                placeholder="e.g. Customer Satisfaction Survey"
-                {...register("title")}
-                disabled={!isEditable}
-                aria-invalid={!!errors.title}
-              />
-              {errors.title && (
-                <p className="text-xs text-destructive">{errors.title.message}</p>
-              )}
-            </div>
+        {activeTab === "settings" && (
+          <SettingsTabContent survey={survey} isEditable={isEditable} />
+        )}
 
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                placeholder="Optional description for your survey..."
-                rows={3}
-                {...register("description")}
-                disabled={!isEditable}
-                aria-invalid={!!errors.description}
-              />
-              {errors.description && (
-                <p className="text-xs text-destructive">
-                  {errors.description.message}
-                </p>
-              )}
-            </div>
+        {activeTab === "results" && (
+          <ResultsTab
+            responseCount={survey._count.responses}
+            viewCount={survey.viewCount}
+            questionCount={survey._count.questions}
+            onShare={handleShare}
+          />
+        )}
+      </main>
 
-            <div className="space-y-2">
-              <Label htmlFor="slug">Custom slug</Label>
-              <Input
-                id="slug"
-                placeholder="auto-generated from title"
-                {...register("slug")}
-                disabled={!isEditable}
-                aria-invalid={!!errors.slug}
-              />
-              <p className="text-xs text-muted-foreground">
-                Your survey link is{" "}
-                <span className="font-medium text-foreground">
-                  /s/{watchedSlug || survey.slug}
-                </span>
-              </p>
-              {errors.slug && (
-                <p className="text-xs text-destructive">{errors.slug.message}</p>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-3">
-              <Label
-                className={cn(
-                  "flex items-center gap-2",
-                  !isEditable && "cursor-not-allowed opacity-50",
-                )}
-              >
-                <input
-                  type="checkbox"
-                  className="size-4 rounded border-input"
-                  {...register("isAnonymous")}
-                  disabled={!isEditable}
-                />
-                Allow anonymous responses
-              </Label>
-              <Label
-                className={cn(
-                  "flex items-center gap-2",
-                  !isEditable && "cursor-not-allowed opacity-50",
-                )}
-              >
-                <input
-                  type="checkbox"
-                  className="size-4 rounded border-input"
-                  {...register("allowMultipleResponses")}
-                  disabled={!isEditable}
-                />
-                Allow multiple responses per person
-              </Label>
-            </div>
-
-            {isEditable && (
-              <div className="flex gap-3 pt-2">
-                <Button
-                  type="submit"
-                  variant="brand"
-                  disabled={updateMutation.isPending || !isDirty}
-                >
-                  {updateMutation.isPending ? "Saving..." : "Save changes"}
-                </Button>
-              </div>
-            )}
-          </form>
-        </CardContent>
-      </Card>
-
-      <Card className="mt-4">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Questions</CardTitle>
-              <CardDescription>
-                Add and arrange questions for your survey.
-              </CardDescription>
-            </div>
-            <Button variant="brand" size="sm" disabled={
-              !isEditable || survey._count.questions > 0
-            }>
-              <Plus data-icon="inline-start" />
-              Add question
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {survey._count.questions === 0 ? (
-            <EmptyState
-              icon={Pencil}
-              title="No questions yet"
-              description="Start building your survey by adding questions. Each question can be one of 9 types: text, choice, rating, and more."
-            />
-          ) : (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              Question builder is coming in the next phase.
-            </p>
-          )}
-        </CardContent>
-      </Card>
+      <PreviewModal
+        open={previewOpen}
+        onOpenChange={setPreviewOpen}
+        survey={{
+          title: survey.title,
+          description: survey.description ?? "",
+          questions: survey.questions ?? [],
+        }}
+      />
 
       <Dialog
         open={!!confirmAction}
@@ -454,6 +417,14 @@ export default function EditSurveyPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </DashboardLayout>
+    </div>
+  );
+}
+
+export default function EditSurveyPage() {
+  return (
+    <BuilderSaveProvider>
+      <EditSurveyPageContent />
+    </BuilderSaveProvider>
   );
 }

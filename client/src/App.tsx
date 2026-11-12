@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 import { ErrorBoundary } from "@/components/error-boundary/ErrorBoundary";
+import { LegalLayout } from "@/components/layout/LegalLayout";
 import {
   AdminRoute,
   ProtectedRoute,
@@ -19,8 +20,15 @@ const CreateSurveyPage = lazy(
   () => import("@/pages/surveys/CreateSurveyPage"),
 );
 const EditSurveyPage = lazy(() => import("@/pages/surveys/EditSurveyPage"));
+const SurveyPublicPage = lazy(
+  () => import("@/pages/public/SurveyPublicPage"),
+);
 const AdminPage = lazy(() => import("@/pages/admin/AdminPage"));
 const NotFoundPage = lazy(() => import("@/pages/NotFoundPage"));
+const PrivacyPolicyPage = lazy(
+  () => import("@/pages/legal/PrivacyPolicyPage"),
+);
+const TermsOfUsePage = lazy(() => import("@/pages/legal/TermsOfUsePage"));
 
 function App() {
   return (
@@ -49,6 +57,28 @@ function App() {
                 <Route path={ROUTES.ADMIN} element={<AdminPage />} />
               </Route>
             </Route>
+
+            <Route
+              path={ROUTES.PRIVACY_POLICY}
+              element={
+                <LegalLayout>
+                  <PrivacyPolicyPage />
+                </LegalLayout>
+              }
+            />
+            <Route
+              path={ROUTES.TERMS_OF_USE}
+              element={
+                <LegalLayout>
+                  <TermsOfUsePage />
+                </LegalLayout>
+              }
+            />
+
+            <Route
+              path={ROUTES.SURVEY_PUBLIC}
+              element={<SurveyPublicPage />}
+            />
 
             <Route path="*" element={<NotFoundPage />} />
           </Routes>

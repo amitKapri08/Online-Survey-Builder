@@ -1,5 +1,6 @@
 import apiClient from "@/api/axios";
 import { setStoredCsrfToken } from "@/api/csrf";
+import type { ApiResponse } from "@/types/api";
 
 export interface RegisterPayload {
   name: string;
@@ -19,12 +20,6 @@ export interface User {
   role: "USER" | "ADMIN";
   createdAt?: string;
   updatedAt?: string;
-}
-
-export interface ApiResponse<T> {
-  success: true;
-  message?: string;
-  data: T;
 }
 
 export type AuthResponse = ApiResponse<{

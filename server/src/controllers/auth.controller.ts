@@ -6,9 +6,12 @@ import {
   clearAuthCookie,
   clearRefreshTokenCookie,
   clearCsrfCookie,
+  REFRESH_COOKIE_NAME,
   setAuthCookie,
   setRefreshTokenCookie,
 } from "../utils/cookies.js";
+import { hashRefreshToken } from "../utils/jwt.js";
+import { prisma } from "../config/prisma.js";
 
 export const register = async (
   req: Request,
@@ -70,7 +73,17 @@ export const login = async (
   }
 };
 
-export const logout = (_req: Request, res: Response): void => {
+export const logout = async (req: Request, res: Response): Promise<void> => {
+  const refreshToken = req.cookies?.[REFRESH_COOKIE_NAME];
+
+  if (refreshToken) {
+    const tokenHash = hashRefreshToken(refreshToken);
+    await prisma.refreshSession.updateMany({
+      where: { tokenHash },
+      data: { revokedAt: new Date() },
+    });
+  }
+
   clearAuthCookie(res);
   clearRefreshTokenCookie(res);
   clearCsrfCookie(res);

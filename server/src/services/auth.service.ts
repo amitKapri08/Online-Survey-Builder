@@ -1,4 +1,5 @@
 import bcrypt from "bcrypt";
+import { randomUUID } from "node:crypto";
 
 import { prisma } from "../config/prisma.js";
 import { AppError } from "../utils/AppError.js";
@@ -14,6 +15,25 @@ import type {
 } from "../validators/auth.validator.js";
 
 const SALT_ROUNDS = 12;
+
+async function issueTokens(user: { id: string; role: "USER" | "ADMIN" }) {
+  const accessToken = signToken({ userId: user.id, role: user.role });
+
+  const refreshToken = generateRefreshToken();
+  const tokenHash = hashRefreshToken(refreshToken);
+  const familyId = `family-${user.id}-${randomUUID()}`;
+
+  await prisma.refreshSession.create({
+    data: {
+      userId: user.id,
+      familyId,
+      tokenHash,
+      expiresAt: getRefreshTokenExpiryDate(),
+    },
+  });
+
+  return { accessToken, refreshToken };
+}
 
 export const registerUser = async (input: RegisterInput) => {
   const existingUser = await prisma.user.findUnique({
@@ -57,24 +77,7 @@ export const registerUser = async (input: RegisterInput) => {
     throw error;
   }
 
-  const accessToken = signToken({
-    userId: user.id,
-    role: user.role,
-  });
-
-  const refreshToken = generateRefreshToken();
-  const tokenHash = hashRefreshToken(refreshToken);
-
-  const familyId = `family-${user.id}-${Date.now()}`;
-
-  await prisma.refreshSession.create({
-    data: {
-      userId: user.id,
-      familyId,
-      tokenHash,
-      expiresAt: getRefreshTokenExpiryDate(),
-    },
-  });
+  const { accessToken, refreshToken } = await issueTokens(user);
 
   return {
     user,
@@ -109,26 +112,8 @@ export const loginUser = async (input: LoginInput) => {
     throw new AppError("Invalid credentials", 401);
   }
 
-  const accessToken = signToken({
-    userId: user.id,
-    role: user.role,
-  });
-
-  const refreshToken = generateRefreshToken();
-  const tokenHash = hashRefreshToken(refreshToken);
-
-  const familyId = `family-${user.id}-${Date.now()}`;
-
-  await prisma.refreshSession.create({
-    data: {
-      userId: user.id,
-      familyId,
-      tokenHash,
-      expiresAt: getRefreshTokenExpiryDate(),
-    },
-  });
-
   const { password: _, ...userWithoutPassword } = user;
+  const { accessToken, refreshToken } = await issueTokens(user);
 
   return {
     user: userWithoutPassword,

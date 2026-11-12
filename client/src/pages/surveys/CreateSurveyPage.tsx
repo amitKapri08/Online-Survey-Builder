@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, LayoutTemplate } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { TemplateGalleryModal } from "@/components/survey-builder";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -42,6 +43,7 @@ export default function CreateSurveyPage() {
   const navigate = useNavigate();
   const createMutation = useCreateSurvey();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [templatesOpen, setTemplatesOpen] = useState(false);
 
   const {
     register,
@@ -86,12 +88,23 @@ export default function CreateSurveyPage() {
           <ArrowLeft data-icon="inline-start" />
           Back to surveys
         </Button>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-          Create a new survey
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Set up the basics. You can add questions after creating the survey.
-        </p>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+              Create a new survey
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Start from scratch, or pick a template to get going faster.
+            </p>
+          </div>
+          <Button
+            variant="brand"
+            onClick={() => setTemplatesOpen(true)}
+          >
+            <LayoutTemplate data-icon="inline-start" />
+            Start from a template
+          </Button>
+        </div>
       </div>
 
       <Card className="max-w-2xl">
@@ -195,6 +208,11 @@ export default function CreateSurveyPage() {
           </form>
         </CardContent>
       </Card>
+
+      <TemplateGalleryModal
+        open={templatesOpen}
+        onOpenChange={setTemplatesOpen}
+      />
     </DashboardLayout>
   );
 }

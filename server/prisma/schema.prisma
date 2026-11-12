@@ -12,8 +12,8 @@ model User {
   name     String
   email    String @unique
   password String
-  
-  role     Role     @default(USER)
+
+  role Role @default(USER)
 
   surveys   Survey[]
   responses Response[]
@@ -25,14 +25,14 @@ model User {
 }
 
 model RefreshSession {
-  id         String    @id @default(uuid())
-  userId     String
-  familyId   String
-  tokenHash  String    @unique
-  expiresAt  DateTime
-  revokedAt  DateTime?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  id        String    @id @default(uuid())
+  userId    String
+  familyId  String
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -42,27 +42,29 @@ model RefreshSession {
 }
 
 model Survey {
-  id          String       @id @default(uuid())
-  title       String
-  description String?
-  slug        String       @unique
-  allowMultipleResponses  Boolean @default(false)
-  viewCount   Int          @default(0)
-  status      SurveyStatus @default(DRAFT)
-  isAnonymous Boolean      @default(false)
-  publishedAt DateTime?
+  id                     String       @id @default(uuid())
+  title                  String
+  description            String?
+  slug                   String       @unique
+  allowMultipleResponses Boolean      @default(false)
+  viewCount              Int          @default(0)
+  status                 SurveyStatus @default(DRAFT)
+  isAnonymous            Boolean      @default(false)
+  publishedAt            DateTime?
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  questions Question[]
-  responses Response[]
+  questions   Question[]
+  responses   Response[]
   surveyViews SurveyView[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([userId])
+  @@index([userId, status])
+  @@index([status, updatedAt])
 }
 
 model SurveyView {
@@ -114,7 +116,7 @@ model QuestionOption {
 }
 
 model Response {
-  id          String    @id @default(uuid())
+  id String @id @default(uuid())
 
   surveyId String
   survey   Survey @relation(fields: [surveyId], references: [id], onDelete: Cascade)

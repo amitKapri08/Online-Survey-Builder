@@ -1,4 +1,5 @@
 import { AuthBrandPanel, AuthLayout, RegisterForm } from "@/components/auth";
+import { LegalLinks } from "@/components/legal/LegalLinks";
 
 export default function RegisterPage() {
   return (
@@ -15,6 +16,8 @@ export default function RegisterPage() {
         </div>
 
         <RegisterForm />
+
+        <LegalLinks className="flex items-center justify-center gap-2 text-xs" />
       </div>
     </AuthLayout>
   );

@@ -10,6 +10,7 @@ import { AppError } from "../utils/AppError.js";
 import {
   setAuthCookie,
   setRefreshTokenCookie,
+  REFRESH_COOKIE_NAME,
   getRefreshTokenExpiryDate,
 } from "../utils/cookies.js";
 
@@ -19,7 +20,7 @@ export const refresh = async (
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const refreshToken = req.cookies?.["refresh-token"];
+    const refreshToken = req.cookies?.[REFRESH_COOKIE_NAME];
 
     if (!refreshToken) {
       throw new AppError("Refresh token missing", 401);
