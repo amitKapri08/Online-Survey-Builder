@@ -15,6 +15,7 @@ A chronological log of the work done on this project. Each update is a standalon
 | 7   | [07-theme-toggle-implementation.md](07-theme-toggle-implementation.md) | Dark mode, theme provider, anti-flicker script, and toggle component |
 | 8   | [08-dark-mode-contrast-and-navbar-routing.md](08-dark-mode-contrast-and-navbar-routing.md) | Dark mode button contrast fix, navbar overhaul, and dashboard-survey routing links |
 | 9   | [09-dedicated-templates-page.md](09-dedicated-templates-page.md) | Dedicated survey templates library page, 8 curated templates, search & interactive preview |
+| 10  | [10-admin-analytics-audit-and-compliance.md](10-admin-analytics-audit-and-compliance.md) | Plan: admin survey analytics drill-down, audit event coverage (logins/lifecycle/reads), audit filtering & IP capture |
 
 ## How to add an update
 
