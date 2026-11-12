@@ -13,13 +13,18 @@ if (!JWT_SECRET) {
   throw new Error("JWT_SECRET is not configured");
 }
 
-const JWT_EXPIRES_IN = (process.env.JWT_EXPIRES_IN || "1d") as NonNullable<
+const JWT_EXPIRES_IN = (process.env.JWT_EXPIRES_IN || "15m") as NonNullable<
   SignOptions["expiresIn"]
 >;
+
+const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN
+  ? (process.env.REFRESH_TOKEN_EXPIRES_IN as NonNullable<SignOptions["expiresIn"]>)
+  : "30d" as NonNullable<SignOptions["expiresIn"]>;
 
 export const env = {
   PORT: Number(process.env.PORT) || 8000,
   NODE_ENV: process.env.NODE_ENV || "development",
   JWT_SECRET,
   JWT_EXPIRES_IN,
+  REFRESH_TOKEN_EXPIRES_IN,
 };

@@ -2,7 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 
 import { loginSchema, registerSchema } from "../validators/auth.validator.js";
 import { loginUser, registerUser } from "../services/auth.service.js";
-import { clearAuthCookie, setAuthCookie } from "../utils/cookies.js";
+import { clearAuthCookie, clearRefreshTokenCookie, clearCsrfCookie, setAuthCookie, setRefreshTokenCookie } from "../utils/cookies.js";
 
 export const register = async (
   req: Request,
@@ -12,9 +12,10 @@ export const register = async (
   try {
     const input = registerSchema.parse(req.body);
 
-    const { user, token } = await registerUser(input);
+    const { user, accessToken, refreshToken } = await registerUser(input);
 
-    setAuthCookie(res, token);
+    setAuthCookie(res, accessToken);
+    setRefreshTokenCookie(res, refreshToken);
 
     res.status(201).json({
       success: true,
@@ -41,9 +42,10 @@ export const login = async (
   try {
     const input = loginSchema.parse(req.body);
 
-    const { user, token } = await loginUser(input);
+    const { user, accessToken, refreshToken } = await loginUser(input);
 
-    setAuthCookie(res, token);
+    setAuthCookie(res, accessToken);
+    setRefreshTokenCookie(res, refreshToken);
 
     res.status(200).json({
       success: true,
@@ -64,6 +66,8 @@ export const login = async (
 
 export const logout = (_req: Request, res: Response): void => {
   clearAuthCookie(res);
+  clearRefreshTokenCookie(res);
+  clearCsrfCookie(res);
 
   res.status(200).json({
     success: true,

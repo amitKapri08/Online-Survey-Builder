@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 
 import { prisma } from "../config/prisma.js";
 import { AppError } from "../utils/AppError.js";
-import { signToken } from "../utils/jwt.js";
+import { signToken, generateRefreshToken, hashRefreshToken } from "../utils/jwt.js";
 import type {
   LoginInput,
   RegisterInput,
@@ -32,14 +32,29 @@ export const registerUser = async (input: RegisterInput) => {
     },
   });
 
-  const token = signToken({
+  const accessToken = signToken({
     userId: user.id,
     role: user.role,
   });
 
+  const refreshToken = generateRefreshToken();
+  const tokenHash = hashRefreshToken(refreshToken);
+
+  const familyId = `family-${user.id}-${Date.now()}`;
+
+  const refreshSession = await prisma.refreshSession.create({
+    data: {
+      userId: user.id,
+      familyId,
+      tokenHash,
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    },
+  });
+
   return {
     user,
-    token,
+    accessToken,
+    refreshToken,
   };
 };
 
@@ -60,13 +75,28 @@ export const loginUser = async (input: LoginInput) => {
     throw new AppError("Invalid credentials", 401);
   }
 
-  const token = signToken({
+  const accessToken = signToken({
     userId: user.id,
     role: user.role,
   });
 
+  const refreshToken = generateRefreshToken();
+  const tokenHash = hashRefreshToken(refreshToken);
+
+  const familyId = `family-${user.id}-${Date.now()}`;
+
+  await prisma.refreshSession.create({
+    data: {
+      userId: user.id,
+      familyId,
+      tokenHash,
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    },
+  });
+
   return {
     user,
-    token,
+    accessToken,
+    refreshToken,
   };
 };
