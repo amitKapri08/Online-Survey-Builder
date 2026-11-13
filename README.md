@@ -54,7 +54,7 @@ A real-world full-stack application that lets users **create surveys, collect re
 
 ### Prerequisites
 
-- Node.js (v20+)
+- Node.js (v22+)
 - PostgreSQL database
 
 ### Setup
@@ -123,6 +123,76 @@ Core models in `server/prisma/schema.prisma`:
 
 - Dev server via `tsx` / `ts-node-dev` (see `server/package.json`)
 - Prisma CLI for schema migrations and client generation
+
+## Deployment
+
+The app is deployed as two independent services: the API on **Render** and the
+client on **Vercel**.
+
+### Server on Render
+
+Create a Web Service from this repository with these settings:
+
+| Setting          | Value                               |
+| ---------------- | ----------------------------------- |
+| Root Directory   | `server`                            |
+| Build Command    | `npm ci --include=dev && npm run build` |
+| Start Command    | `npm start`                         |
+| Health Check     | `/api/health`                       |
+
+`npm run build` runs `prisma generate && tsc`, so the Prisma client is always
+regenerated from `prisma/schema.prisma` on a clean checkout. (`server/src/generated/prisma`
+is intentionally git-ignored.)
+
+Required environment variables:
+
+| Variable                   | Example / notes                                                                 |
+| -------------------------- | ------------------------------------------------------------------------------- |
+| `NODE_ENV`                 | `production`                                                                     |
+| `DATABASE_URL`             | Render PostgreSQL connection string (prefer the **Internal** URL)                |
+| `JWT_SECRET`               | Random string, **at least 32 characters** in production                           |
+| `JWT_EXPIRES_IN`           | `15m`                                                                            |
+| `REFRESH_TOKEN_EXPIRES_IN` | `30d`                                                                            |
+| `CORS_ORIGIN`              | The Vercel URL, e.g. `https://surveyhub.vercel.app` (no trailing slash)           |
+| `COOKIE_SAME_SITE`         | `none` — Vercel and Render are different sites (see [Cookies](#cookies))          |
+
+Migrations are intentionally **not** part of the build command. Apply them once
+against the Render database with `npx prisma migrate deploy` (Render Shell or a
+local machine using the external database URL). `render.yaml` documents the same
+service configuration for Blueprint deploys.
+
+### Client on Vercel
+
+| Setting          | Value                                     |
+| ---------------- | ----------------------------------------- |
+| Root Directory   | `client`                                  |
+| Framework        | Vite                                      |
+| Build Command    | `npm ci && npm run build`                 |
+| Output Directory | `dist`                                    |
+| Env Variable     | `VITE_API_URL=https://<render-service>.onrender.com/api` |
+
+The build fails fast if `VITE_API_URL` is missing, so a broken bundle is never
+published. `client/vercel.json` rewrites every path to `index.html` (client-side
+routing survives a hard refresh) and marks hashed assets as immutable.
+
+### Cookies
+
+Because the client and API run on different sites (`*.vercel.app` and
+`*.onrender.com`), authentication cookies use `SameSite=None; Secure`. This is
+configured with `COOKIE_SAME_SITE=none`, which `server/src/config/env.ts` only
+allows in production and only with `Secure` enabled.
+
+If the API is instead exposed under the same site as the client (for example a
+Vercel rewrite/proxy of `/api/*`, or a custom subdomain such as
+`api.example.com` + `app.example.com`), set `COOKIE_SAME_SITE=lax` — it avoids
+the browser restrictions that can affect third-party cookies.
+
+### Continuous integration
+
+`.github/workflows/ci.yml` runs on every push to `main` and on pull requests:
+
+- **Client:** `npm ci` → `npm run lint` → `npm run build` → `npm test`
+- **Server:** ephemeral `postgres:16` service → `npm ci` → `npx prisma migrate deploy` → `npm run build` → `npm test`
 
 ## Documentation
 

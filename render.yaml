@@ -1,0 +1,31 @@
+# Render blueprint for the API service.
+# Existing services created in the Render dashboard ignore this file; it
+# documents the settings a new Blueprint deploy should use.
+services:
+  - type: web
+    name: surveyhub-api
+    runtime: node
+    rootDir: server
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_EXPIRES_IN
+        value: 15m
+      - key: REFRESH_TOKEN_EXPIRES_IN
+        value: 30d
+      - key: CORS_ORIGIN
+        sync: false
+      # Vercel and Render are different sites, so cross-site cookies need
+      # SameSite=None. Use `lax` instead if the API is proxied through the
+      # Vercel domain.
+      - key: COOKIE_SAME_SITE
+        value: none
+    # Uncomment once migrations are automated:
+    # preDeployCommand: npx prisma migrate deploy

@@ -67,21 +67,34 @@ const server: Server = app.listen(env.PORT, async () => {
   log(` Timestamp     : ${timestamp()}`);
   log(` Environment   : ${env.NODE_ENV}`);
   log(` Port          : ${env.PORT}`);
-  log(` CORS origin   : ${env.CORS_ORIGIN}`);
+  log(` CORS origin   : ${env.CORS_ORIGINS.join(", ")}`);
+  log(` Cookies       : sameSite=${env.COOKIE_SAME_SITE} secure=${env.COOKIE_SECURE}`);
   log(` JWT access    : ${env.JWT_EXPIRES_IN}`);
   log(` JWT refresh   : ${env.REFRESH_TOKEN_EXPIRES_IN}`);
   log(` Database      : ${databaseOk ? "connected" : "UNREACHABLE"}`);
   log("--------------------------------------------");
-  log(" API routes (under /api):");
-  const routes = collectRoutes(
-    (app._router as { stack: ReadonlyArray<Layer> }).stack,
-    "/api",
-  );
-  if (routes.length) {
-    for (const route of routes) log(`  ${route}`);
-  } else {
-    log("  (none registered)");
+
+  // Express 5 exposes the router as `app.router`; the old `app._router` is
+  // undefined and would throw inside this async callback. The route table is
+  // a local-development aid only, so production logs stay quiet either way.
+  if (!env.isProduction) {
+    try {
+      const routes = collectRoutes(
+        (app.router as unknown as { stack: ReadonlyArray<Layer> }).stack,
+        "/api",
+      );
+
+      log(" API routes (under /api):");
+      if (routes.length) {
+        for (const route of routes) log(`  ${route}`);
+      } else {
+        log("  (none registered)");
+      }
+    } catch (error) {
+      logError("Unable to list routes:", error);
+    }
   }
+
   log("============================================");
   log(`Server ready on http://localhost:${env.PORT}`);
 });

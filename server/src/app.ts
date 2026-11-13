@@ -1,4 +1,5 @@
 import cookieParser from "cookie-parser";
+import compression from "compression";
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
@@ -14,14 +15,16 @@ const app = express();
 app.set("trust proxy", 1);
 
 app.use(helmet());
-app.use(morgan("dev"));
-app.use(express.json());
+app.use(morgan(env.isProduction ? "combined" : "dev"));
+app.use(compression());
+app.use(express.json({ limit: "1mb" }));
 app.use(cookieParser());
 
 app.use(
   cors({
-    origin: env.CORS_ORIGIN,
+    origin: env.CORS_ORIGINS,
     credentials: true,
+    maxAge: 600,
   }),
 );
 

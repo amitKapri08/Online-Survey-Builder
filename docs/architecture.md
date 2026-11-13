@@ -21,6 +21,21 @@ submit surveys, and administrators to manage and monitor the platform.
 - Audit logging and system monitoring
 - Scalable deployment architecture
 
+### Implementation status
+
+This document spans the current implementation and the planned/scaled
+architecture. Today the app runs as:
+
+- **Client:** React + Vite on Vercel (`client/`, SPA rewrite via `vercel.json`)
+- **API:** Express 5 + Prisma/PostgreSQL on Render (`server/`, health check at
+  `/api/health`)
+- **Database:** a single PostgreSQL instance accessed through Prisma
+
+Sections that mention **Redis**, **BullMQ**, **Docker**, background workers, or
+object storage describe **optional future scaling work**, not services the
+project currently deploys. See the root [`README.md`](../README.md#deployment)
+for the actual Render and Vercel configuration.
+
 ---
 
 # 2. High-Level Architecture

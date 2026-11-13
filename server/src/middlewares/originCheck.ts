@@ -2,7 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import { AppError } from "../utils/AppError.js";
 import { env } from "../config/env.js";
 
-const expectedOrigin = env.CORS_ORIGIN;
+const expectedOrigins = env.CORS_ORIGINS;
 
 export const originCheck = (
   req: Request,
@@ -15,7 +15,7 @@ export const originCheck = (
   // calls), we deliberately pass through. This check is defense-in-depth
   // alongside CSRF token validation, not a standalone guard.
   if (origin) {
-    if (origin !== expectedOrigin) {
+    if (!expectedOrigins.includes(origin)) {
       throw new AppError("Invalid origin", 403);
     }
   }

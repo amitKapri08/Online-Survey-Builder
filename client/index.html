@@ -5,19 +5,9 @@
     <link rel="icon" type="image/svg+xml" href="/surveyhub-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SurveyHub</title>
-    <script>
-      (function() {
-        try {
-          var stored = localStorage.getItem('surveyhub-theme');
-          var isDark = stored === 'dark' || ((!stored || stored === 'system') && window.matchMedia('(prefers-color-scheme: dark)').matches);
-          if (isDark) {
-            document.documentElement.classList.add('dark');
-          } else {
-            document.documentElement.classList.remove('dark');
-          }
-        } catch (e) {}
-      })();
-    </script>
+    <!-- Applies the stored theme before first paint. Kept as an external file
+         so the production CSP can stay at script-src 'self' (no inline code). -->
+    <script src="/theme-init.js"></script>
   </head>
   <body>
     <div id="root"></div>
