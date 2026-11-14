@@ -144,6 +144,16 @@ export async function reorderQuestions(
   });
 }
 
+export async function setAllQuestionsRequired(
+  surveyId: string,
+  isRequired: boolean,
+): Promise<number> {
+  const response = await apiClient.patch<
+    ApiResponse<{ updatedCount: number }>
+  >(`/surveys/${surveyId}/questions/required-all`, { isRequired });
+  return response.data.data.updatedCount;
+}
+
 export async function createOption(
   surveyId: string,
   questionId: string,

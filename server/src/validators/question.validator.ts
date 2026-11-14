@@ -31,6 +31,15 @@ const optionInputSchema = z.object({
 
 const optionInputListSchema = z.array(optionInputSchema);
 
+const ratingLabelsSchema = z
+  .array(
+    z
+      .string()
+      .trim()
+      .max(100, "Rating label must be at most 100 characters"),
+  )
+  .max(100, "Too many rating labels");
+
 function addRangeNotAcceptedIssues(
   input: {
     minValue?: number | null | undefined;
@@ -59,6 +68,7 @@ function validateQuestionRequirements(
     questionType?: (typeof QUESTION_TYPES)[number] | undefined;
     minValue?: number | null | undefined;
     maxValue?: number | null | undefined;
+    ratingLabels?: string[] | undefined;
     options?:
       | { optionText: string; position?: number | undefined }[]
       | undefined;
@@ -66,6 +76,7 @@ function validateQuestionRequirements(
   ctx: z.RefinementCtx,
 ): void {
   const options = input.options ?? [];
+  const ratingLabels = input.ratingLabels ?? [];
 
   if (
     input.minValue != null &&
@@ -76,6 +87,31 @@ function validateQuestionRequirements(
       code: "custom",
       message: "maxValue must be greater than minValue",
       path: ["maxValue"],
+    });
+  }
+
+  if (
+    ratingLabels.length > 0 &&
+    input.questionType !== undefined &&
+    input.questionType !== "RATING"
+  ) {
+    ctx.addIssue({
+      code: "custom",
+      message: "Only rating questions accept scale labels",
+      path: ["ratingLabels"],
+    });
+  }
+
+  if (
+    input.questionType === "RATING" &&
+    input.minValue != null &&
+    input.maxValue != null &&
+    ratingLabels.length > input.maxValue - input.minValue + 1
+  ) {
+    ctx.addIssue({
+      code: "custom",
+      message: "There cannot be more labels than rating values",
+      path: ["ratingLabels"],
     });
   }
 
@@ -129,6 +165,7 @@ export const createQuestionSchema = z
     isRequired: z.boolean().optional(),
     minValue: MIN_MAX.optional(),
     maxValue: MIN_MAX.optional(),
+    ratingLabels: ratingLabelsSchema.optional(),
     options: optionInputListSchema.optional(),
   })
   .superRefine(validateQuestionRequirements);
@@ -145,6 +182,7 @@ export const updateQuestionSchema = z
     isRequired: z.boolean().optional(),
     minValue: MIN_MAX.nullable().optional(),
     maxValue: MIN_MAX.nullable().optional(),
+    ratingLabels: ratingLabelsSchema.optional(),
     options: optionInputListSchema.optional(),
   })
   .superRefine(validateQuestionRequirements)
@@ -156,6 +194,12 @@ export const reorderQuestionsSchema = z.object({
   questionIds: z
     .array(z.string().uuid("Invalid question id"))
     .min(2, "At least two questions are required to reorder"),
+});
+
+export const setAllQuestionsRequiredSchema = z.object({
+  isRequired: z.boolean({
+    error: "isRequired must be a boolean",
+  }),
 });
 
 export const createOptionSchema = z.object({
@@ -194,5 +238,8 @@ export type BatchCreateQuestionsInput = z.infer<
 >;
 export type UpdateQuestionInput = z.infer<typeof updateQuestionSchema>;
 export type ReorderQuestionsInput = z.infer<typeof reorderQuestionsSchema>;
+export type SetAllQuestionsRequiredInput = z.infer<
+  typeof setAllQuestionsRequiredSchema
+>;
 export type CreateOptionInput = z.infer<typeof createOptionSchema>;
 export type UpdateOptionInput = z.infer<typeof updateOptionSchema>;

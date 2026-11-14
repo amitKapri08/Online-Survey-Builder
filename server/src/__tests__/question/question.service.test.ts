@@ -64,10 +64,20 @@ describe("createQuestion", () => {
       questionType: "RATING",
       minValue: 1,
       maxValue: 5,
+      ratingLabels: [
+        "Very dissatisfied",
+        "Dissatisfied",
+        "Neutral",
+        "Satisfied",
+        "Very satisfied",
+      ],
     });
 
     expect(result.minValue).toBe(1);
     expect(result.maxValue).toBe(5);
+    expect(result.ratingLabels).toHaveLength(5);
+    expect(result.ratingLabels[0]).toBe("Very dissatisfied");
+    expect(result.ratingLabels[4]).toBe("Very satisfied");
   });
 
   it("appends at next position", async () => {

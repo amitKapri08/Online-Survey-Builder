@@ -26,7 +26,10 @@ function authUser(): User {
   } as User;
 }
 
-function renderPublicOnlyRoute(authValue: AuthContextType, initialEntry = "/login") {
+function renderPublicOnlyRoute(
+  authValue: AuthContextType,
+  initialEntry: string | { pathname: string; state?: unknown } = "/login",
+) {
   return render(
     <AuthContext.Provider value={authValue}>
       <MemoryRouter initialEntries={[initialEntry]}>
@@ -35,6 +38,7 @@ function renderPublicOnlyRoute(authValue: AuthContextType, initialEntry = "/logi
             <Route path="/login" element={<div>Login Form</div>} />
           </Route>
           <Route path="/dashboard" element={<div>Dashboard Page</div>} />
+          <Route path="/s/:slug" element={<div>Survey Page</div>} />
         </Routes>
       </MemoryRouter>
     </AuthContext.Provider>,
@@ -62,5 +66,17 @@ describe("PublicOnlyRoute", () => {
     );
     expect(screen.getByText("Dashboard Page")).toBeInTheDocument();
     expect(screen.queryByText("Login Form")).not.toBeInTheDocument();
+  });
+
+  it("redirects authenticated users back to the requested page", () => {
+    renderPublicOnlyRoute(
+      makeAuthValue({ user: authUser(), isAuthenticated: true, isLoading: false }),
+      {
+        pathname: "/login",
+        state: { from: { pathname: "/s/my-survey" } },
+      },
+    );
+    expect(screen.getByText("Survey Page")).toBeInTheDocument();
+    expect(screen.queryByText("Dashboard Page")).not.toBeInTheDocument();
   });
 });

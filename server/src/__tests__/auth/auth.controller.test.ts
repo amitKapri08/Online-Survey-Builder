@@ -27,6 +27,7 @@ describe("POST /api/auth/register", () => {
         name: "New User",
         email: "new@example.com",
         password: "StrongPass@1",
+        termsAccepted: true,
       });
 
     expect(res.status).toBe(201);
@@ -34,6 +35,44 @@ describe("POST /api/auth/register", () => {
     expect(res.body.data.user.name).toBe("New User");
     expect(res.body.data.user.email).toBe("new@example.com");
     expect(res.body.data.user.role).toBe("USER");
+  });
+
+  it("returns 400 when terms are not accepted", async () => {
+    const csrfToken = generateCsrfToken();
+    const res = await request(app)
+      .post("/api/auth/register")
+      .set("Cookie", `${CSRF_COOKIE_NAME}=${csrfToken}`)
+      .set("X-CSRF-Token", csrfToken)
+      .send({
+        name: "No Consent",
+        email: "noconsent@example.com",
+        password: "StrongPass@1",
+      });
+
+    expect(res.status).toBe(400);
+    expect(res.body.success).toBe(false);
+  });
+
+  it("records when the user accepted the terms", async () => {
+    const csrfToken = generateCsrfToken();
+    const res = await request(app)
+      .post("/api/auth/register")
+      .set("Cookie", `${CSRF_COOKIE_NAME}=${csrfToken}`)
+      .set("X-CSRF-Token", csrfToken)
+      .send({
+        name: "Consent User",
+        email: "consent@example.com",
+        password: "StrongPass@1",
+        termsAccepted: true,
+      });
+
+    expect(res.status).toBe(201);
+
+    const user = await prisma.user.findUnique({
+      where: { email: "consent@example.com" },
+      select: { termsAcceptedAt: true },
+    });
+    expect(user?.termsAcceptedAt).toBeInstanceOf(Date);
   });
 
   it("sets auth and refresh cookies", async () => {
@@ -46,6 +85,7 @@ describe("POST /api/auth/register", () => {
         name: "Cookie User",
         email: "cookies@example.com",
         password: "StrongPass@1",
+        termsAccepted: true,
       });
 
     expect(res.headers["set-cookie"]).toBeDefined();
@@ -65,6 +105,7 @@ describe("POST /api/auth/register", () => {
         name: "Dup User",
         email: "dup@example.com",
         password: "StrongPass@1",
+        termsAccepted: true,
       });
 
     expect(res.status).toBe(409);
@@ -94,6 +135,7 @@ describe("POST /api/auth/register", () => {
         name: "No CSRF",
         email: "nocsrf@example.com",
         password: "StrongPass@1",
+        termsAccepted: true,
       });
 
     expect(res.status).toBe(403);

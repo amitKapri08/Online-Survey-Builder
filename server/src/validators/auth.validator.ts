@@ -30,6 +30,10 @@ export const registerSchema = z.object({
           "Password must contain uppercase, lowercase, number and special character",
       },
     ),
+
+  termsAccepted: z.literal(true, {
+    message: "You must accept the terms and privacy policy",
+  }),
 });
 
 export const loginSchema = z.object({

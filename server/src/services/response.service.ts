@@ -252,6 +252,14 @@ export const submitResponse = async (
     throw new AppError("Survey not found", 404);
   }
 
+  if (!survey.isAnonymous && !userId) {
+    throw new AppError(
+      "This survey requires you to sign in",
+      401,
+      "LOGIN_REQUIRED",
+    );
+  }
+
   const shouldBeAnonymous = Boolean(
     survey.isAnonymous && (input.submitAnonymously || !userId),
   );

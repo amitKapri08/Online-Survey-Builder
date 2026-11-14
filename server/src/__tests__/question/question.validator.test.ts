@@ -26,9 +26,39 @@ describe("createQuestionSchema", () => {
       questionType: "RATING",
       minValue: 1,
       maxValue: 5,
+      ratingLabels: [
+        "Very dissatisfied",
+        "Dissatisfied",
+        "Neutral",
+        "Satisfied",
+        "Very satisfied",
+      ],
     });
     expect(result.minValue).toBe(1);
     expect(result.maxValue).toBe(5);
+    expect(result.ratingLabels).toHaveLength(5);
+  });
+
+  it("rejects more rating labels than rating values", () => {
+    expect(() =>
+      createQuestionSchema.parse({
+        questionText: "Rate this product",
+        questionType: "RATING",
+        minValue: 1,
+        maxValue: 2,
+        ratingLabels: ["One", "Two", "Three"],
+      }),
+    ).toThrow();
+  });
+
+  it("rejects rating labels on a non-rating question", () => {
+    expect(() =>
+      createQuestionSchema.parse({
+        questionText: "What is your name?",
+        questionType: "SHORT_TEXT",
+        ratingLabels: ["One", "Two"],
+      }),
+    ).toThrow();
   });
 
   it("parses a valid SINGLE_CHOICE question with options", () => {

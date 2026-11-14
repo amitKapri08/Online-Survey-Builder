@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { AxiosError } from "axios";
-import { CheckCircle2, ClipboardList, Sparkles } from "lucide-react";
+import { CheckCircle2, ClipboardList, LogIn, Sparkles, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 
 import { SurveyAnswerForm } from "@/components/public/SurveyAnswerForm";
@@ -15,6 +15,8 @@ import { usePublicSurvey, useSubmitResponse } from "@/hooks/useSurveyApi";
 import { recordSurveyView } from "@/services/survey.service";
 import { ROUTES } from "@/lib/routes";
 import { getApiErrorMessage } from "@/lib/apiError";
+import { buttonVariants } from "@/lib/buttonVariant";
+import { cn } from "@/lib/utils";
 import type { SubmitResponsePayload } from "@/types/survey";
 
 function SurveyPublicPage() {
@@ -229,8 +231,49 @@ function SurveyPublicPage() {
           )}
         </header>
 
-        {/* Survey Questions Form */}
-        {survey.questions.length === 0 ? (
+        {/* Login gate for non-anonymous surveys */}
+        {!survey.isAnonymous && !isAuthenticated ? (
+          <Card className="w-full rounded-3xl border border-border/80 shadow-xl">
+            <CardContent className="flex flex-col items-center gap-5 px-6 py-10 text-center">
+              <div className="flex size-14 items-center justify-center rounded-2xl bg-brand-50 text-brand-600 ring-2 ring-brand-500/20 dark:bg-brand-950/40 dark:text-brand-300">
+                <LogIn className="size-7" />
+              </div>
+              <div className="space-y-2">
+                <h2 className="text-xl font-bold tracking-tight text-foreground">
+                  Sign in to respond
+                </h2>
+                <p className="mx-auto max-w-sm text-sm text-muted-foreground">
+                  This survey is not anonymous, so responses must be linked to
+                  your account. Sign in or create a free account to continue.
+                </p>
+              </div>
+              <div className="flex w-full max-w-xs flex-col gap-2.5">
+                <Link
+                  to={ROUTES.LOGIN}
+                  state={{ from: { pathname: `/s/${survey.slug}` } }}
+                  className={cn(
+                    buttonVariants({ variant: "brand" }),
+                    "w-full gap-2",
+                  )}
+                >
+                  <LogIn className="size-4" />
+                  Sign in
+                </Link>
+                <Link
+                  to={ROUTES.REGISTER}
+                  state={{ from: { pathname: `/s/${survey.slug}` } }}
+                  className={cn(
+                    buttonVariants({ variant: "outline" }),
+                    "w-full gap-2",
+                  )}
+                >
+                  <UserPlus className="size-4" />
+                  Create an account
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        ) : survey.questions.length === 0 ? (
           <Card className="w-full rounded-3xl border border-border/80 shadow-xl">
             <CardContent className="pt-6">
               <EmptyState

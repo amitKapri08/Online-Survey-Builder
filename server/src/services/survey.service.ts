@@ -147,6 +147,7 @@ const questionDetailSelect = {
     position: true,
     minValue: true,
     maxValue: true,
+    ratingLabels: true,
     options: {
       select: {
         id: true,
@@ -382,6 +383,7 @@ export const duplicateSurvey = async (surveyId: string, userId: string) => {
           position: true,
           minValue: true,
           maxValue: true,
+          ratingLabels: true,
           options: {
             select: { optionText: true, position: true },
           },
@@ -426,6 +428,7 @@ export const duplicateSurvey = async (surveyId: string, userId: string) => {
           position: question.position,
           minValue: question.minValue,
           maxValue: question.maxValue,
+          ratingLabels: question.ratingLabels,
           options: {
             create: question.options.map((option) => ({
               optionText: option.optionText,

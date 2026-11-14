@@ -10,6 +10,7 @@ import {
 } from "../helpers.js";
 import { signToken } from "../../utils/jwt.js";
 import { AUTH_COOKIE_NAME, CSRF_COOKIE_NAME } from "../../utils/cookies.js";
+import { prisma } from "../../config/prisma.js";
 
 function csrfHeaders(user: { id: string; role: string }) {
   const token = signToken({ userId: user.id, role: user.role as "USER" | "ADMIN" });
@@ -129,6 +130,73 @@ describe("PATCH /api/surveys/:surveyId/questions/reorder", () => {
       .send({ questionIds: [q2.id, q1.id] });
 
     expect(res.status).toBe(200);
+  });
+});
+
+describe("PATCH /api/surveys/:surveyId/questions/required-all", () => {
+  it("marks every question required and can clear all", async () => {
+    const user = await createUser();
+    const survey = await createSurvey({ userId: user.id, status: "DRAFT" });
+    await createQuestion({ surveyId: survey.id, position: 1 });
+    await createQuestion({ surveyId: survey.id, position: 2 });
+    const headers = csrfHeaders(user);
+
+    const markRes = await request(app)
+      .patch(`/api/surveys/${survey.id}/questions/required-all`)
+      .set(headers)
+      .send({ isRequired: true });
+
+    expect(markRes.status).toBe(200);
+    expect(markRes.body.data.updatedCount).toBe(2);
+    expect(
+      await prisma.question.count({
+        where: { surveyId: survey.id, isRequired: true },
+      }),
+    ).toBe(2);
+
+    const clearRes = await request(app)
+      .patch(`/api/surveys/${survey.id}/questions/required-all`)
+      .set(headers)
+      .send({ isRequired: false });
+
+    expect(clearRes.status).toBe(200);
+    expect(clearRes.body.data.updatedCount).toBe(2);
+    expect(
+      await prisma.question.count({
+        where: { surveyId: survey.id, isRequired: true },
+      }),
+    ).toBe(0);
+  });
+
+  it("rejects non-draft surveys", async () => {
+    const user = await createUser();
+    const survey = await createSurvey({
+      userId: user.id,
+      status: "PUBLISHED",
+      publishedAt: new Date(),
+    });
+    const headers = csrfHeaders(user);
+
+    const res = await request(app)
+      .patch(`/api/surveys/${survey.id}/questions/required-all`)
+      .set(headers)
+      .send({ isRequired: true });
+
+    expect(res.status).toBe(400);
+    expect(res.body.code).toBe("SURVEY_LOCKED");
+  });
+
+  it("returns 400 for an invalid payload", async () => {
+    const user = await createUser();
+    const survey = await createSurvey({ userId: user.id, status: "DRAFT" });
+    const headers = csrfHeaders(user);
+
+    const res = await request(app)
+      .patch(`/api/surveys/${survey.id}/questions/required-all`)
+      .set(headers)
+      .send({ isRequired: "yes" });
+
+    expect(res.status).toBe(400);
   });
 });
 

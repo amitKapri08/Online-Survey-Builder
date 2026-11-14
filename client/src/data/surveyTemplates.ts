@@ -69,6 +69,13 @@ export const SURVEY_TEMPLATES: SurveyTemplate[] = [
           isRequired: true,
           minValue: 1,
           maxValue: 5,
+          ratingLabels: [
+            "Very dissatisfied",
+            "Dissatisfied",
+            "Neutral",
+            "Satisfied",
+            "Very satisfied",
+          ],
         },
         {
           questionText: "How likely are you to recommend us to a friend or colleague?",
@@ -131,6 +138,13 @@ export const SURVEY_TEMPLATES: SurveyTemplate[] = [
           isRequired: true,
           minValue: 1,
           maxValue: 5,
+          ratingLabels: [
+            "Not at all",
+            "Slightly",
+            "Moderately",
+            "Very",
+            "Extremely",
+          ],
         },
         {
           questionText: "Do you feel your manager supports your professional growth and well-being?",
@@ -254,6 +268,13 @@ export const SURVEY_TEMPLATES: SurveyTemplate[] = [
           isRequired: true,
           minValue: 1,
           maxValue: 5,
+          ratingLabels: [
+            "Very difficult",
+            "Difficult",
+            "Neutral",
+            "Easy",
+            "Very easy",
+          ],
         },
         {
           questionText: "Which feature do you find most valuable?",
@@ -313,6 +334,13 @@ export const SURVEY_TEMPLATES: SurveyTemplate[] = [
           isRequired: true,
           minValue: 1,
           maxValue: 5,
+          ratingLabels: [
+            "Very poor",
+            "Poor",
+            "Average",
+            "Good",
+            "Excellent",
+          ],
         },
         {
           questionText: "Which device and browser did you use?",
@@ -363,6 +391,13 @@ export const SURVEY_TEMPLATES: SurveyTemplate[] = [
           isRequired: true,
           minValue: 1,
           maxValue: 5,
+          ratingLabels: [
+            "Very poor",
+            "Poor",
+            "Average",
+            "Good",
+            "Excellent",
+          ],
         },
         {
           questionText: "The instructor explained complex topics clearly and was helpful",
@@ -441,6 +476,13 @@ export const SURVEY_TEMPLATES: SurveyTemplate[] = [
           isRequired: true,
           minValue: 1,
           maxValue: 5,
+          ratingLabels: [
+            "Very negative",
+            "Negative",
+            "Neutral",
+            "Positive",
+            "Very positive",
+          ],
         },
         {
           questionText: "Did you feel recognized and valued for your contributions?",

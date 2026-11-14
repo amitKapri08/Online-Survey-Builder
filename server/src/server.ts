@@ -16,29 +16,6 @@ function logError(...args: unknown[]): void {
   console.error(`[${timestamp()}]`, ...args);
 }
 
-interface Layer {
-  route?: { path?: string | RegExp; methods?: Record<string, boolean> };
-  handle?: { stack?: ReadonlyArray<Layer> };
-}
-
-function collectRoutes(stack: ReadonlyArray<Layer>, base: string): string[] {
-  const lines: string[] = [];
-  for (const layer of stack) {
-    const path = layer.route?.path;
-    if (path && typeof path === "string") {
-      const methods = Object.keys(layer.route?.methods ?? {})
-        .filter((method) => method !== "_all" && method !== "head")
-        .map((method) => method.toUpperCase());
-      if (methods.length) {
-        lines.push(`${methods.join(",").padEnd(10)} ${base}${path}`);
-      }
-    } else if (layer.handle?.stack) {
-      lines.push(...collectRoutes(layer.handle.stack, base));
-    }
-  }
-  return lines;
-}
-
 async function checkDatabase(): Promise<boolean> {
   try {
     await prisma.$queryRaw`SELECT 1`;
@@ -72,29 +49,6 @@ const server: Server = app.listen(env.PORT, async () => {
   log(` JWT access    : ${env.JWT_EXPIRES_IN}`);
   log(` JWT refresh   : ${env.REFRESH_TOKEN_EXPIRES_IN}`);
   log(` Database      : ${databaseOk ? "connected" : "UNREACHABLE"}`);
-  log("--------------------------------------------");
-
-  // Express 5 exposes the router as `app.router`; the old `app._router` is
-  // undefined and would throw inside this async callback. The route table is
-  // a local-development aid only, so production logs stay quiet either way.
-  if (!env.isProduction) {
-    try {
-      const routes = collectRoutes(
-        (app.router as unknown as { stack: ReadonlyArray<Layer> }).stack,
-        "/api",
-      );
-
-      log(" API routes (under /api):");
-      if (routes.length) {
-        for (const route of routes) log(`  ${route}`);
-      } else {
-        log("  (none registered)");
-      }
-    } catch (error) {
-      logError("Unable to list routes:", error);
-    }
-  }
-
   log("============================================");
   log(`Server ready on http://localhost:${env.PORT}`);
 });

@@ -23,6 +23,7 @@ import {
   useUpdateQuestion,
   useDeleteQuestion,
   useReorderQuestions,
+  useSetAllQuestionsRequired,
 } from "@/hooks/useSurveyApi";
 import { useBuilderSave } from "@/hooks/useBuilderSave";
 import { getApiErrorMessage } from "@/lib/apiError";
@@ -46,6 +47,9 @@ function questionPayloadForClone(question: SurveyQuestion): CreateQuestionPayloa
     isRequired: question.isRequired,
     ...(question.minValue != null ? { minValue: question.minValue } : {}),
     ...(question.maxValue != null ? { maxValue: question.maxValue } : {}),
+    ...(question.ratingLabels && question.ratingLabels.length > 0
+      ? { ratingLabels: question.ratingLabels }
+      : {}),
     options: question.options.map((option) => ({ optionText: option.optionText })),
   };
 }
@@ -74,6 +78,7 @@ function editingDefaultsFor(payload: CreateQuestionPayload): QuestionEditorIniti
     isRequired: payload.isRequired ?? false,
     minValue: payload.minValue ?? null,
     maxValue: payload.maxValue ?? null,
+    ratingLabels: payload.ratingLabels ?? [],
     options: (payload.options ?? []).map((option) => ({
       id: option.id,
       optionText: option.optionText,
@@ -115,6 +120,7 @@ function BuildTab({
   const updateMutation = useUpdateQuestion(surveyId);
   const deleteMutation = useDeleteQuestion(surveyId);
   const reorderMutation = useReorderQuestions(surveyId);
+  const setAllRequiredMutation = useSetAllQuestionsRequired(surveyId);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -224,6 +230,21 @@ function BuildTab({
       );
     } catch (error) {
       toast.error(getApiErrorMessage(error, "Failed to update question"));
+    }
+  };
+
+  const handleSetAllRequired = async (isRequired: boolean) => {
+    try {
+      await runWithSaveState(() =>
+        setAllRequiredMutation.mutateAsync(isRequired),
+      );
+      toast.success(
+        isRequired
+          ? "All questions are now required"
+          : "All questions are now optional",
+      );
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Failed to update questions"));
     }
   };
 
@@ -341,6 +362,14 @@ function BuildTab({
     (option) => option.value === draggedType,
   );
 
+  const requiredCount = visibleQuestions.filter(
+    (question) => question.isRequired,
+  ).length;
+  const allRequired =
+    visibleQuestions.length > 0 && requiredCount === visibleQuestions.length;
+  const noneRequired = requiredCount === 0;
+  const bulkRequiredPending = setAllRequiredMutation.isPending;
+
   return (
     <div className="lg:grid lg:grid-cols-[268px_1fr] lg:items-start lg:gap-8">
       <QuestionTypeSidebar
@@ -348,54 +377,92 @@ function BuildTab({
         isEditable={isEditable}
       />
 
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-      >
-        <SurveyCanvas
-          title={title}
-          description={description}
-          questions={visibleQuestions}
-          isEditable={isEditable}
-          isPending={isPending}
-          editingId={editingId}
-          isCreating={isCreating}
-          onTitleChange={onTitleChange}
-          onDescriptionChange={onDescriptionChange}
-          onBeginCreate={() => {
-            setCreatingInitialValues(null);
-            setEditingId(CREATING_KEY);
-          }}
-          onStartEdit={(questionId) => {
-            setCreatingInitialValues(null);
-            setEditingId(questionId);
-          }}
-          onCancelEdit={handleCancelCreate}
-          onSave={handleUpdate}
-          onCreate={handleCreate}
-          onDelete={setConfirmDeleteId}
-          onDuplicate={handleDuplicate}
-          onMoveUp={(index) => handleMove(index, -1)}
-          onMoveDown={(index) => handleMove(index, 1)}
-          onQuickToggleRequired={handleQuickToggleRequired}
-          creatingInitialValues={creatingInitialValues}
-        />
-
-        <DragOverlay>
-          {draggedGroup ? (
-            <div className="flex cursor-grabbing items-center gap-3 rounded-lg border bg-background p-3 shadow-lg">
-              <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-foreground text-background">
-                <draggedGroup.icon className="size-4" />
-              </span>
-              <span className="text-sm font-medium text-foreground">
-                {draggedGroup.label}
-              </span>
+      <div className="space-y-4">
+        {isEditable && visibleQuestions.length > 0 && (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border/80 bg-card/60 px-3 py-2 shadow-2xs">
+            <p className="text-xs font-medium text-muted-foreground">
+              {allRequired
+                ? "All questions are required"
+                : noneRequired
+                  ? "No questions are required"
+                  : `${requiredCount} of ${visibleQuestions.length} required`}
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => void handleSetAllRequired(false)}
+                disabled={
+                  noneRequired || bulkRequiredPending || isPending || isCreating
+                }
+              >
+                Clear all
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => void handleSetAllRequired(true)}
+                disabled={
+                  allRequired || bulkRequiredPending || isPending || isCreating
+                }
+              >
+                {bulkRequiredPending ? "Updating..." : "Mark all required"}
+              </Button>
             </div>
-          ) : null}
-        </DragOverlay>
-      </DndContext>
+          </div>
+        )}
+
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+        >
+          <SurveyCanvas
+            title={title}
+            description={description}
+            questions={visibleQuestions}
+            isEditable={isEditable}
+            isPending={isPending}
+            editingId={editingId}
+            isCreating={isCreating}
+            onTitleChange={onTitleChange}
+            onDescriptionChange={onDescriptionChange}
+            onBeginCreate={() => {
+              setCreatingInitialValues(null);
+              setEditingId(CREATING_KEY);
+            }}
+            onStartEdit={(questionId) => {
+              setCreatingInitialValues(null);
+              setEditingId(questionId);
+            }}
+            onCancelEdit={handleCancelCreate}
+            onSave={handleUpdate}
+            onCreate={handleCreate}
+            onDelete={setConfirmDeleteId}
+            onDuplicate={handleDuplicate}
+            onMoveUp={(index) => handleMove(index, -1)}
+            onMoveDown={(index) => handleMove(index, 1)}
+            onQuickToggleRequired={handleQuickToggleRequired}
+            creatingInitialValues={creatingInitialValues}
+          />
+
+          <DragOverlay>
+            {draggedGroup ? (
+              <div className="flex cursor-grabbing items-center gap-3 rounded-lg border bg-background p-3 shadow-lg">
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-foreground text-background">
+                  <draggedGroup.icon className="size-4" />
+                </span>
+                <span className="text-sm font-medium text-foreground">
+                  {draggedGroup.label}
+                </span>
+              </div>
+            ) : null}
+          </DragOverlay>
+        </DndContext>
+      </div>
 
       <Dialog
         open={!!confirmDeleteId}

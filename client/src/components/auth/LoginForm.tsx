@@ -3,7 +3,7 @@ import { AxiosError } from "axios";
 import { Mail } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import {
   AuthDivider,
@@ -14,12 +14,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/useAuth";
 import { useLogin } from "@/hooks/useAuthApi";
+import { getPostAuthRedirect } from "@/lib/authRedirect";
 import { ROUTES } from "@/lib/routes";
 import { loginSchema, type LoginFormValues } from "@/schemas/auth.schema";
 
 export function LoginForm() {
   const { setUser } = useAuth();
   const loginMutation = useLogin();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const [serverError, setServerError] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
@@ -43,6 +46,7 @@ export function LoginForm() {
       const response = await loginMutation.mutateAsync(values);
 
       setUser(response.data.user);
+      navigate(getPostAuthRedirect(location.state), { replace: true });
     } catch (error) {
       if (error instanceof AxiosError) {
         const status = error.response?.status;
@@ -136,6 +140,7 @@ export function LoginForm() {
         Don&apos;t have an account?{" "}
         <Link
           to={ROUTES.REGISTER}
+          state={location.state}
           className="font-semibold text-brand-600 hover:text-brand-700 hover:underline"
         >
           Sign up

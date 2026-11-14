@@ -12,10 +12,31 @@ describe("registerSchema", () => {
       name: "John Doe",
       email: "JOHN@example.com",
       password: "Password@123",
+      termsAccepted: true,
     });
     expect(result.name).toBe("John Doe");
     expect(result.email).toBe("john@example.com");
     expect(result.password).toBe("Password@123");
+    expect(result.termsAccepted).toBe(true);
+  });
+
+  it("rejects registration without consent", () => {
+    expect(() =>
+      registerSchema.parse({
+        name: "John Doe",
+        email: "john@example.com",
+        password: "Password@123",
+      }),
+    ).toThrow();
+
+    expect(() =>
+      registerSchema.parse({
+        name: "John Doe",
+        email: "john@example.com",
+        password: "Password@123",
+        termsAccepted: false,
+      }),
+    ).toThrow();
   });
 
   it("rejects name shorter than 2 characters", () => {
@@ -45,6 +66,7 @@ describe("registerSchema", () => {
       name: "John",
       email: "UPPER@EXAMPLE.COM",
       password: "Password@123",
+      termsAccepted: true,
     });
     expect(result.email).toBe("upper@example.com");
   });

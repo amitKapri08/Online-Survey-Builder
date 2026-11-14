@@ -61,6 +61,7 @@ export const registerUser = async (input: RegisterInput) => {
         email: input.email,
         password: passwordHash,
         role: "USER",
+        termsAcceptedAt: new Date(),
       },
       select: {
         id: true,

@@ -6,6 +6,7 @@ import {
   createSurvey,
   createQuestion,
   authHeaders,
+  authHeadersWithCsrf,
   generateCsrfToken,
   TestUser,
 } from "../helpers.js";
@@ -20,6 +21,7 @@ beforeEach(async () => {
     status: "PUBLISHED",
     publishedAt: new Date(),
     allowMultipleResponses: true,
+    isAnonymous: true,
   });
 });
 
@@ -52,6 +54,39 @@ describe("POST /api/surveys/:id/responses", () => {
     expect(res.body.data.response.id).toBeDefined();
   });
 
+  it("requires login for a non-anonymous survey", async () => {
+    const nonAnonymous = await createSurvey({
+      userId: user.id,
+      status: "PUBLISHED",
+      publishedAt: new Date(),
+      isAnonymous: false,
+    });
+
+    const res = await request(app)
+      .post(`/api/surveys/${nonAnonymous.id}/responses`)
+      .set(csrfHeaders())
+      .send({ answers: [], submitAnonymously: false });
+
+    expect(res.status).toBe(401);
+    expect(res.body.code).toBe("LOGIN_REQUIRED");
+  });
+
+  it("records an authenticated response for a non-anonymous survey", async () => {
+    const nonAnonymous = await createSurvey({
+      userId: user.id,
+      status: "PUBLISHED",
+      publishedAt: new Date(),
+      isAnonymous: false,
+    });
+
+    const res = await request(app)
+      .post(`/api/surveys/${nonAnonymous.id}/responses`)
+      .set(authHeadersWithCsrf(user))
+      .send({ answers: [], submitAnonymously: false });
+
+    expect(res.status).toBe(201);
+  });
+
   it("returns 404 for a draft survey", async () => {
     const draft = await createSurvey({ userId: user.id, status: "DRAFT" });
 
@@ -81,6 +116,7 @@ describe("POST /api/surveys/:id/responses", () => {
       status: "PUBLISHED",
       publishedAt: new Date(),
       allowMultipleResponses: false,
+      isAnonymous: true,
     });
 
     const agent = request.agent(app);

@@ -27,6 +27,7 @@ const questionSelect = {
   position: true,
   minValue: true,
   maxValue: true,
+  ratingLabels: true,
   options: {
     select: {
       id: true,
@@ -129,6 +130,7 @@ export const createQuestion = async (
     isRequired: input.isRequired ?? false,
     minValue: input.minValue ?? null,
     maxValue: input.maxValue ?? null,
+    ratingLabels: input.ratingLabels ?? [],
     position,
   };
 
@@ -175,6 +177,7 @@ export const batchCreateQuestions = async (
         isRequired: item.isRequired ?? false,
         minValue: item.minValue ?? null,
         maxValue: item.maxValue ?? null,
+        ratingLabels: item.ratingLabels ?? [],
         position: currentPosition,
       };
 
@@ -222,6 +225,11 @@ export const updateQuestion = async (
   }
   if (input.maxValue !== undefined) {
     data.maxValue = input.maxValue;
+  }
+  if (input.ratingLabels !== undefined) {
+    data.ratingLabels = input.ratingLabels;
+  } else if (input.questionType !== undefined && input.questionType !== "RATING") {
+    data.ratingLabels = [];
   }
 
   const nextType = input.questionType ?? existing.questionType;
@@ -324,6 +332,21 @@ export const reorderQuestions = async (
       }),
     ),
   );
+};
+
+export const setAllQuestionsRequired = async (
+  surveyId: string,
+  userId: string,
+  isRequired: boolean,
+): Promise<number> => {
+  await getEditableSurveyOrThrow(surveyId, userId);
+
+  const result = await prisma.question.updateMany({
+    where: { surveyId },
+    data: { isRequired },
+  });
+
+  return result.count;
 };
 
 export const createOption = async (

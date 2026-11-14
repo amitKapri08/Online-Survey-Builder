@@ -12,6 +12,7 @@ import {
   updateQuestion,
   deleteQuestion,
   reorderQuestions,
+  setAllQuestionsRequired,
   createOption,
   updateOption,
   deleteOption,
@@ -169,6 +170,20 @@ export function useReorderQuestions(surveyId: string) {
   return useMutation({
     mutationFn: (questionIds: string[]) =>
       reorderQuestions(surveyId, questionIds),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: surveyKeys.detail(surveyId),
+      });
+    },
+  });
+}
+
+export function useSetAllQuestionsRequired(surveyId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (isRequired: boolean) =>
+      setAllQuestionsRequired(surveyId, isRequired),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: surveyKeys.detail(surveyId),

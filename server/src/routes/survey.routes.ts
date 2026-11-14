@@ -21,6 +21,7 @@ import {
   handleUpdateQuestion,
   handleDeleteQuestion,
   handleReorderQuestions,
+  handleSetAllQuestionsRequired,
   handleCreateOption,
   handleUpdateOption,
   handleDeleteOption,
@@ -88,6 +89,13 @@ router.patch(
   originCheck,
   csrf,
   handleReorderQuestions,
+);
+router.patch(
+  "/:surveyId/questions/required-all",
+  authenticate,
+  originCheck,
+  csrf,
+  handleSetAllQuestionsRequired,
 );
 router.patch(
   "/:surveyId/questions/:questionId",

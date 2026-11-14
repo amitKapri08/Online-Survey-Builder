@@ -63,7 +63,7 @@ export async function createSurvey(overrides: CreateSurveyOverrides) {
         .toLowerCase(),
       status: overrides.status ?? "DRAFT",
       allowMultipleResponses: overrides.allowMultipleResponses ?? false,
-      isAnonymous: overrides.isAnonymous ?? false,
+      isAnonymous: overrides.isAnonymous ?? true,
       userId: overrides.userId,
       ...(overrides.publishedAt !== undefined && overrides.publishedAt !== null
         ? { publishedAt: overrides.publishedAt }
@@ -110,6 +110,7 @@ type CreateQuestionOverrides = {
   position?: number;
   minValue?: number | null;
   maxValue?: number | null;
+  ratingLabels?: string[];
 };
 
 export async function createQuestion(overrides: CreateQuestionOverrides) {
@@ -122,6 +123,7 @@ export async function createQuestion(overrides: CreateQuestionOverrides) {
       position: overrides.position ?? 1,
       minValue: overrides.minValue ?? null,
       maxValue: overrides.maxValue ?? null,
+      ratingLabels: overrides.ratingLabels ?? [],
     },
   });
 }

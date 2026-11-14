@@ -337,37 +337,55 @@ function SurveyAnswerForm({
           />
         )}
 
-        {/* RATING / NPS */}
+        {/* RATING */}
         {q.questionType === "RATING" && (
-          <div className="space-y-3">
-            <div className="flex flex-wrap overflow-hidden rounded-xl border border-border/80 bg-muted/30 p-1 shadow-2xs divide-x divide-border/60 sm:flex-nowrap">
-              {Array.from(
-                { length: ratingMax - ratingMin + 1 },
-                (_, offset) => ratingMin + offset,
-              ).map((num) => {
-                const isSelected = val === String(num);
-                return (
-                  <button
-                    key={num}
-                    type="button"
-                    onClick={() => setValue(q.id, String(num))}
-                    disabled={isSubmitting}
-                    className={cn(
-                      "flex flex-1 min-w-[36px] items-center justify-center py-2.5 text-sm font-semibold transition-all cursor-pointer first:rounded-l-lg last:rounded-r-lg",
-                      isSelected
-                        ? "bg-foreground text-background shadow-xs font-bold ring-2 ring-foreground scale-105 z-10"
-                        : "hover:bg-muted text-muted-foreground hover:text-foreground",
-                    )}
-                  >
-                    {num}
-                  </button>
-                );
-              })}
-            </div>
-            <div className="flex justify-between text-xs text-muted-foreground px-1">
-              <span>Not likely at all ({ratingMin})</span>
-              <span>Extremely likely ({ratingMax})</span>
-            </div>
+          <div className="space-y-2">
+            {(() => {
+              const ratingLabels = q.ratingLabels ?? [];
+              const hasRatingLabels = ratingLabels.some(
+                (label) => label.trim().length > 0,
+              );
+
+              return (
+                <div className="flex flex-wrap overflow-hidden rounded-xl border border-border/80 bg-muted/30 p-1 shadow-2xs divide-x divide-border/60 sm:flex-nowrap">
+                  {Array.from(
+                    { length: ratingMax - ratingMin + 1 },
+                    (_, offset) => ratingMin + offset,
+                  ).map((num, offset) => {
+                    const isSelected = val === String(num);
+                    const label = ratingLabels[offset] ?? "";
+                    return (
+                      <div
+                        key={num}
+                        className="flex flex-1 flex-col justify-between first:rounded-l-lg last:rounded-r-lg"
+                      >
+                        <button
+                          type="button"
+                          onClick={() => setValue(q.id, String(num))}
+                          disabled={isSubmitting}
+                          className={cn(
+                            "flex w-full items-center justify-center py-2.5 text-sm font-semibold transition-all cursor-pointer",
+                            isSelected
+                              ? "bg-foreground text-background shadow-xs font-bold ring-2 ring-foreground scale-105 z-10"
+                              : "hover:bg-muted text-muted-foreground hover:text-foreground",
+                          )}
+                        >
+                          {num}
+                        </button>
+                        {hasRatingLabels && (
+                          <span
+                            className="px-1 pb-1.5 text-center text-[10px] leading-tight text-muted-foreground line-clamp-2"
+                            title={label}
+                          >
+                            {label || "—"}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
           </div>
         )}
 

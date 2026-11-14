@@ -3,7 +3,7 @@ import { Mail, User } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { AxiosError } from "axios";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import {
   AuthDivider,
@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/context/useAuth";
 import { useRegister } from "@/hooks/useAuthApi";
+import { getPostAuthRedirect } from "@/lib/authRedirect";
 import { cn } from "@/lib/utils";
 import { ROUTES } from "@/lib/routes";
 import { registerSchema, type RegisterFormValues } from "@/schemas/auth.schema";
@@ -22,6 +23,8 @@ import { registerSchema, type RegisterFormValues } from "@/schemas/auth.schema";
 export function RegisterForm() {
   const { setUser } = useAuth();
   const registerMutation = useRegister();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -52,9 +55,11 @@ export function RegisterForm() {
         name: values.name,
         email: values.email,
         password: values.password,
+        termsAccepted: true,
       });
 
       setUser(response.data.user);
+      navigate(getPostAuthRedirect(location.state), { replace: true });
     } catch (error) {
       if (error instanceof AxiosError) {
         const status = error.response?.status;
@@ -216,21 +221,25 @@ export function RegisterForm() {
 
               <span className="text-xs leading-5 text-muted-foreground">
                 I agree to the{" "}
-                <Button
-                  type="button"
-                  variant="link"
-                  className="h-auto px-0 text-xs font-medium"
+                <Link
+                  to={ROUTES.TERMS_OF_USE}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={(event) => event.stopPropagation()}
+                  className="text-xs font-medium text-brand-600 underline-offset-2 hover:underline dark:text-brand-400"
                 >
                   Terms of Service
-                </Button>{" "}
+                </Link>{" "}
                 and{" "}
-                <Button
-                  type="button"
-                  variant="link"
-                  className="h-auto px-0 text-xs font-medium"
+                <Link
+                  to={ROUTES.PRIVACY_POLICY}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={(event) => event.stopPropagation()}
+                  className="text-xs font-medium text-brand-600 underline-offset-2 hover:underline dark:text-brand-400"
                 >
                   Privacy Policy
-                </Button>
+                </Link>
               </span>
             </label>
           )}
@@ -262,6 +271,7 @@ export function RegisterForm() {
         Already have an account?{" "}
         <Link
           to={ROUTES.LOGIN}
+          state={location.state}
           className="font-semibold text-brand-600 hover:text-brand-700 hover:underline"
         >
           Sign in

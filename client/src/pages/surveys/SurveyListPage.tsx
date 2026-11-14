@@ -3,8 +3,10 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   ChevronRight,
   ClipboardList,
-  Copy,
+  CopyPlus,
+  ExternalLink,
   LayoutDashboard,
+  Link2,
   Pencil,
   Plus,
   Sparkles,
@@ -69,6 +71,20 @@ export default function SurveyListPage() {
   const { data, isLoading } = useSurveys({ page, limit: 10, status, search });
   const deleteMutation = useDeleteSurvey();
   const duplicateMutation = useDuplicateSurvey();
+
+  const handleCopyLink = async (slug: string, title: string) => {
+    const url = `${window.location.origin}/s/${slug}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success(`Copied link for "${title}"`);
+    } catch {
+      toast.info(url);
+    }
+  };
+
+  const handleOpenPublicPage = (slug: string) => {
+    window.open(`${window.location.origin}/s/${slug}`, "_blank", "noopener");
+  };
 
   const handleDuplicate = async (surveyId: string) => {
     try {
@@ -218,9 +234,12 @@ export default function SurveyListPage() {
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <h3 className="truncate text-sm font-medium text-foreground">
+                        <Link
+                          to={ROUTES.SURVEY_VIEW.replace(":id", survey.id)}
+                          className="truncate text-sm font-medium text-foreground transition-colors hover:text-brand-600 dark:hover:text-brand-400"
+                        >
                           {survey.title}
-                        </h3>
+                        </Link>
                         <Badge variant={STATUS_BADGE[survey.status]}>
                           {survey.status.toLowerCase()}
                         </Badge>
@@ -234,12 +253,48 @@ export default function SurveyListPage() {
                       </p>
                     </div>
                     <div className="flex items-center gap-1">
+                      {survey.status === "PUBLISHED" ? (
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() =>
+                              handleCopyLink(survey.slug, survey.title)
+                            }
+                            title="Copy public link"
+                            aria-label={`Copy link for ${survey.title}`}
+                          >
+                            <Link2 className="size-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => handleOpenPublicPage(survey.slug)}
+                            title="Open public page"
+                            aria-label={`Open public page for ${survey.title}`}
+                          >
+                            <ExternalLink className="size-4" />
+                          </Button>
+                        </>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          disabled
+                          title="Publish to share"
+                          aria-label="Publish to share"
+                        >
+                          <Link2 className="size-4" />
+                        </Button>
+                      )}
                       <Button
                         variant="ghost"
                         size="icon-sm"
                         onClick={() =>
                           navigate(ROUTES.SURVEY_EDIT.replace(":id", survey.id))
                         }
+                        title="Edit survey"
+                        aria-label={`Edit ${survey.title}`}
                       >
                         <Pencil className="size-4" />
                       </Button>
@@ -248,14 +303,17 @@ export default function SurveyListPage() {
                         size="icon-sm"
                         onClick={() => handleDuplicate(survey.id)}
                         disabled={duplicateMutation.isPending}
+                        title="Duplicate survey"
                         aria-label={`Duplicate ${survey.title}`}
                       >
-                        <Copy className="size-4" />
+                        <CopyPlus className="size-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon-sm"
                         onClick={() => setDeleteId(survey.id)}
+                        title="Delete survey"
+                        aria-label={`Delete ${survey.title}`}
                       >
                         <Trash2 className="size-4 text-destructive" />
                       </Button>

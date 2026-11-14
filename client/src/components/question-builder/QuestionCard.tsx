@@ -218,6 +218,7 @@ function QuestionCard({
               isRequired: question.isRequired,
               minValue: question.minValue,
               maxValue: question.maxValue,
+              ratingLabels: question.ratingLabels ?? [],
               options: question.options.map((option) => ({
                 id: option.id,
                 optionText: option.optionText,

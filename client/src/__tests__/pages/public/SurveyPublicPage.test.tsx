@@ -4,9 +4,12 @@ import userEvent from "@testing-library/user-event";
 import { Route, Routes } from "react-router-dom";
 import SurveyPublicPage from "@/pages/public/SurveyPublicPage";
 import { renderWithAuth } from "@/__tests__/helpers";
-import { resetMockData } from "@/__tests__/mocks/handlers";
+import { mockAuthUser, mockPublicSurvey, resetMockData } from "@/__tests__/mocks/handlers";
 
-function renderPage(route = "/s/my-published-survey", user = null) {
+function renderPage(
+  route = "/s/my-published-survey",
+  user: typeof mockAuthUser | null = mockAuthUser,
+) {
   const testUser = userEvent.setup();
   const view = renderWithAuth(
     <Routes>
@@ -124,5 +127,37 @@ describe("SurveyPublicPage", () => {
         "This survey could not be found, or it is not currently open for responses.",
       ),
     ).toBeInTheDocument();
+  });
+
+  it("prompts logged-out visitors to sign in for a non-anonymous survey", async () => {
+    renderPage("/s/my-published-survey", null);
+
+    expect(
+      await screen.findByRole("heading", { name: "Sign in to respond" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByPlaceholderText("Type your answer here..."),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /^Sign in$/ }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /Create an account/ }),
+    ).toBeInTheDocument();
+  });
+
+  it("renders the form for logged-out visitors on an anonymous survey", async () => {
+    mockPublicSurvey.isAnonymous = true;
+    renderPage("/s/my-published-survey", null);
+
+    expect(
+      await screen.findByRole("heading", { name: "My Published Survey" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText("Type your answer here..."),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "Sign in to respond" }),
+    ).not.toBeInTheDocument();
   });
 });

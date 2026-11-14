@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -157,6 +158,7 @@ export interface QuestionEditorInitialValues {
   isRequired: boolean;
   minValue: number | null;
   maxValue: number | null;
+  ratingLabels?: string[];
   options: { id?: string; optionText: string }[];
 }
 
@@ -170,9 +172,30 @@ interface QuestionEditorProps {
   ) => void | Promise<void>;
 }
 
+function normalizeRatingLabels(
+  labels: string[] | undefined,
+  minValue: number | null,
+  maxValue: number | null,
+): string[] {
+  if (
+    minValue == null ||
+    maxValue == null ||
+    !Number.isFinite(minValue) ||
+    !Number.isFinite(maxValue) ||
+    maxValue <= minValue
+  ) {
+    return [];
+  }
+
+  return Array.from({ length: maxValue - minValue + 1 }, (_, index) => {
+    return labels?.[index] ?? "";
+  });
+}
+
 function buildPayload(
   values: QuestionFormValues,
   isCreating: boolean,
+  ratingLabels: string[],
 ): CreateQuestionPayload | UpdateQuestionPayload {
   const isChoice = isChoiceType(values.questionType);
   const isRange = isRangeType(values.questionType);
@@ -186,15 +209,36 @@ function buildPayload(
   const range: {
     minValue?: number | null;
     maxValue?: number | null;
+    ratingLabels?: string[];
   } = {};
   if (isRange) {
     range.minValue =
       values.minValue === "" ? null : Number(values.minValue);
     range.maxValue =
       values.maxValue === "" ? null : Number(values.maxValue);
+
+    if (values.questionType === "RATING") {
+      const min = range.minValue;
+      const max = range.maxValue;
+      const labels =
+        typeof min === "number" &&
+        typeof max === "number" &&
+        Number.isFinite(min) &&
+        Number.isFinite(max) &&
+        max > min
+          ? Array.from({ length: max - min + 1 }, (_, index) => {
+              return (ratingLabels[index] ?? "").trim();
+            })
+          : [];
+
+      range.ratingLabels = labels.some((label) => label.length > 0)
+        ? labels
+        : [];
+    }
   } else if (!isCreating) {
     range.minValue = null;
     range.maxValue = null;
+    range.ratingLabels = [];
   }
 
   const options = isChoice
@@ -253,11 +297,41 @@ function QuestionEditor({
   const minRequired = watchedType === "RATING";
   const maxRequired = watchedType === "RATING";
 
+  const [ratingLabels, setRatingLabels] = useState<string[]>(() =>
+    initialValues?.questionType === "RATING"
+      ? normalizeRatingLabels(
+          initialValues.ratingLabels,
+          initialValues.minValue,
+          initialValues.maxValue,
+        )
+      : [],
+  );
+
+  const ratingMin = Number(watchedMin);
+  const ratingMax = Number(watchedMax);
+  const hasValidRatingRange =
+    watchedType === "RATING" &&
+    watchedMin !== "" &&
+    watchedMax !== "" &&
+    Number.isFinite(ratingMin) &&
+    Number.isFinite(ratingMax) &&
+    ratingMax > ratingMin;
+  const ratingValueCount = hasValidRatingRange ? ratingMax - ratingMin + 1 : 0;
+
+  const updateRatingLabel = (index: number, value: string) => {
+    setRatingLabels((previous) => {
+      const next = [...previous];
+      while (next.length <= index) next.push("");
+      next[index] = value;
+      return next;
+    });
+  };
+
   const handleFormSubmit = handleSubmit(
     async (values) => {
       let payload: CreateQuestionPayload | UpdateQuestionPayload;
       try {
-        payload = buildPayload(values, isCreating);
+        payload = buildPayload(values, isCreating, ratingLabels);
       } catch {
         toast.error("Failed to build question");
         return;
@@ -383,6 +457,43 @@ function QuestionEditor({
               .
             </p>
           )}
+        </div>
+      )}
+
+      {watchedType === "RATING" && ratingValueCount > 0 && (
+        <div className="space-y-2">
+          <div>
+            <Label className="text-sm font-medium">
+              Scale labels{" "}
+              <span className="text-muted-foreground">(optional)</span>
+            </Label>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Add descriptive text under each rating value so respondents know
+              what the numbers mean.
+            </p>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {Array.from({ length: ratingValueCount }, (_, index) => {
+              const value = ratingMin + index;
+              return (
+                <div key={value} className="flex items-center gap-2">
+                  <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-muted text-xs font-bold text-muted-foreground">
+                    {value}
+                  </span>
+                  <Input
+                    id={`rating-label-${value}`}
+                    value={ratingLabels[index] ?? ""}
+                    onChange={(event) =>
+                      updateRatingLabel(index, event.target.value)
+                    }
+                    maxLength={100}
+                    placeholder={`Label for ${value}`}
+                    aria-label={`Label for rating value ${value}`}
+                  />
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 

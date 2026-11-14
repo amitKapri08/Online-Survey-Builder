@@ -22,7 +22,8 @@ model User {
 
   adminAuditLogs AdminAuditLog[]
 
-  deletedAt DateTime?
+  termsAcceptedAt DateTime?
+  deletedAt       DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -106,6 +107,7 @@ model Question {
   position     Int
   minValue     Int?
   maxValue     Int?
+  ratingLabels String[]     @default([])
 
   surveyId String
   survey   Survey @relation(fields: [surveyId], references: [id], onDelete: Cascade)

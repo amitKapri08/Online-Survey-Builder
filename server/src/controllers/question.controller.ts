@@ -6,6 +6,7 @@ import {
   updateQuestion,
   deleteQuestion,
   reorderQuestions,
+  setAllQuestionsRequired,
   createOption,
   updateOption,
   deleteOption,
@@ -15,6 +16,7 @@ import {
   batchCreateQuestionsSchema,
   updateQuestionSchema,
   reorderQuestionsSchema,
+  setAllQuestionsRequiredSchema,
   createOptionSchema,
   updateOptionSchema,
 } from "../validators/question.validator.js";
@@ -138,6 +140,36 @@ export const handleReorderQuestions = async (
     res.status(200).json({
       success: true,
       message: "Questions reordered successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const handleSetAllQuestionsRequired = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      throw new AppError("Authentication required", 401);
+    }
+
+    const surveyId = req.params.surveyId as string;
+    const input = setAllQuestionsRequiredSchema.parse(req.body);
+    const updatedCount = await setAllQuestionsRequired(
+      surveyId,
+      req.user.id,
+      input.isRequired,
+    );
+
+    res.status(200).json({
+      success: true,
+      message: input.isRequired
+        ? "All questions marked as required"
+        : "All questions marked as optional",
+      data: { updatedCount },
     });
   } catch (error) {
     next(error);

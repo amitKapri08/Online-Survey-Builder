@@ -19,9 +19,11 @@ const RegisterPage = lazy(() => import("@/pages/auth/RegisterPage"));
 const DashboardPage = lazy(() => import("@/pages/dashboard/DashboardPage"));
 const SurveyListPage = lazy(() => import("@/pages/surveys/SurveyListPage"));
 const CreateSurveyPage = lazy(() => import("@/pages/surveys/CreateSurveyPage"));
+const SurveyViewPage = lazy(() => import("@/pages/surveys/SurveyViewPage"));
 const EditSurveyPage = lazy(() => import("@/pages/surveys/EditSurveyPage"));
 const TemplatesPage = lazy(() => import("@/pages/templates/TemplatesPage"));
 const SurveyPublicPage = lazy(() => import("@/pages/public/SurveyPublicPage"));
+const DemoSurveyPage = lazy(() => import("@/pages/public/DemoSurveyPage"));
 const AdminPage = lazy(() => import("@/pages/admin/AdminPage"));
 const ProfilePage = lazy(() => import("@/pages/account/ProfilePage"));
 const NotFoundPage = lazy(() => import("@/pages/NotFoundPage"));
@@ -59,6 +61,7 @@ function App() {
               <Route element={<DashboardLayout />}>
                 <Route path={ROUTES.DASHBOARD} element={<DashboardPage />} />
                 <Route path={ROUTES.SURVEYS} element={<SurveyListPage />} />
+                <Route path={ROUTES.SURVEY_VIEW} element={<SurveyViewPage />} />
                 <Route
                   path={ROUTES.SURVEY_CREATE}
                   element={<CreateSurveyPage />}
@@ -90,6 +93,7 @@ function App() {
             />
 
             <Route path={ROUTES.SURVEY_PUBLIC} element={<SurveyPublicPage />} />
+            <Route path={ROUTES.DEMO} element={<DemoSurveyPage />} />
 
             <Route path="*" element={<NotFoundPage />} />
           </Routes>

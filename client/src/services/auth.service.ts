@@ -6,6 +6,7 @@ export interface RegisterPayload {
   name: string;
   email: string;
   password: string;
+  termsAccepted: true;
 }
 
 export interface LoginPayload {

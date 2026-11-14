@@ -15,6 +15,7 @@ function renderPage(route = "/") {
           <Route path="/login" element={<div>Login Route</div>} />
           <Route path="/register" element={<div>Register Route</div>} />
           <Route path="/templates" element={<div>Templates Route</div>} />
+          <Route path="/demo" element={<div>Demo Route</div>} />
           <Route path="/privacy" element={<div>Privacy Route</div>} />
           <Route path="/terms" element={<div>Terms Route</div>} />
         </Routes>
@@ -50,10 +51,10 @@ describe("LandingPage", () => {
     expect(screen.getByText("Register Route")).toBeInTheDocument();
   });
 
-  it("navigates to templates from the demo CTA", async () => {
+  it("navigates to the public demo from the demo CTA", async () => {
     const { user } = renderPage();
     await user.click(screen.getByText("View Live Demo"));
-    expect(screen.getByText("Templates Route")).toBeInTheDocument();
+    expect(screen.getByText("Demo Route")).toBeInTheDocument();
   });
 
   it("signs in from the header button", async () => {

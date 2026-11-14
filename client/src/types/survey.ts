@@ -60,6 +60,7 @@ export interface SurveyQuestion {
   position: number;
   minValue: number | null;
   maxValue: number | null;
+  ratingLabels?: string[];
   options: SurveyQuestionOption[];
 }
 
@@ -117,6 +118,7 @@ export interface CreateQuestionPayload {
   isRequired?: boolean;
   minValue?: number;
   maxValue?: number;
+  ratingLabels?: string[];
   options?: QuestionOptionInput[];
 }
 
@@ -126,6 +128,7 @@ export interface UpdateQuestionPayload {
   isRequired?: boolean;
   minValue?: number | null;
   maxValue?: number | null;
+  ratingLabels?: string[];
   options?: QuestionOptionInput[];
 }
 

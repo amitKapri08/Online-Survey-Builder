@@ -11,6 +11,7 @@ describe("registerUser", () => {
       name: "Test User",
       email: "test@example.com",
       password: "StrongPass@1",
+      termsAccepted: true,
     });
 
     expect(result.user).toBeDefined();
@@ -32,6 +33,7 @@ describe("registerUser", () => {
       name: "User",
       email: "session-test@example.com",
       password: "StrongPass@1",
+      termsAccepted: true,
     });
 
     const sessions = await prisma.refreshSession.findMany({
@@ -49,6 +51,7 @@ describe("registerUser", () => {
         name: "Dup User",
         email: "dup@example.com",
         password: "StrongPass@1",
+        termsAccepted: true,
       }),
     ).rejects.toThrow(AppError);
 
@@ -57,6 +60,7 @@ describe("registerUser", () => {
         name: "Dup User",
         email: "dup@example.com",
         password: "StrongPass@1",
+        termsAccepted: true,
       });
     } catch (error) {
       expect((error as AppError).statusCode).toBe(409);

@@ -60,6 +60,12 @@ export default function LandingPage() {
             >
               Templates
             </Link>
+            <Link
+              to={ROUTES.DEMO}
+              className="transition-colors hover:text-foreground"
+            >
+              Live demo
+            </Link>
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-3">
@@ -128,7 +134,7 @@ export default function LandingPage() {
                 <Button
                   size="lg"
                   variant="outline"
-                  onClick={() => navigate(ROUTES.TEMPLATES)}
+                  onClick={() => navigate(ROUTES.DEMO)}
                   className="rounded-xl px-6 py-3.5 text-base font-medium shadow-2xs"
                 >
                   View Live Demo

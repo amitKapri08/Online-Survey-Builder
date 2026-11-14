@@ -83,6 +83,7 @@ describe("useAuthApi hooks", () => {
         name: "Jane Doe",
         email: "jane@example.com",
         password: "Password@123",
+        termsAccepted: true,
       });
     });
 
